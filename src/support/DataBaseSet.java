@@ -21,6 +21,7 @@ public class DataBaseSet {
     private String password=null;
     
     private Statement stat;
+    private Connection conn;
 
     public String getClassName() {
         return className;
@@ -69,6 +70,14 @@ public class DataBaseSet {
     public void setStat(Statement stat) {
         this.stat = stat;
     }
+
+    public Connection getConn() {
+        return conn;
+    }
+
+    public void setConn(Connection conn) {
+        this.conn = conn;
+    }
     
     /**
      * 每次都通过此方法链接数据库
@@ -78,8 +87,7 @@ public class DataBaseSet {
         
         String databasePath=System.getProperty("user.dir")+System.getProperty("file.separator")+"database"+System.getProperty("file.separator")+"database";
         Class.forName("org.sqlite.JDBC");
-        Connection conn =
-                DriverManager.getConnection("jdbc:sqlite:"+databasePath,null,null);
+        conn = DriverManager.getConnection("jdbc:sqlite:"+databasePath,null,null);
         stat = conn.createStatement();
     }
     
@@ -88,6 +96,7 @@ public class DataBaseSet {
      * @throws Exception 
      */
     public void close() throws Exception{
+        conn.close();
         stat.close();
     }
 }

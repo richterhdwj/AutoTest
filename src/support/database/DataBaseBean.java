@@ -6,12 +6,13 @@ package support.database;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import support.DataBaseSet;
-import support.database.databaseModel.UserInfo;
+import support.databaseModel.UserInfo;
 
 /**
  * 一切新增、删除、修改、查询的方法都存在这里
@@ -23,7 +24,7 @@ public class DataBaseBean extends DataBaseSet {
     String table_name;
 
     /**
-     * sql是以where语句为主，切记要注意这不但是sqllite,也没有什么函数可以用，一切用简单方式（order by 应该还是可以用的）
+     * 简单查询结构(obj)所属的所有数据
      *
      * @param obj
      * @param sql
@@ -32,10 +33,14 @@ public class DataBaseBean extends DataBaseSet {
      * @throws Exception
      */
     @SuppressWarnings("unchecked")
-    public List selectObject(Object obj) throws SQLException, Exception {
+    public List selectObject(Class tableClass, String sql) throws SQLException, Exception {
         connect();
+        Class newObj = Class.forName(tableClass.getName());
+        Constructor ct = newObj.getConstructor();
+        Object obj = ct.newInstance();
+
         String tableName = getTableName(obj);
-        ResultSet rs = this.getStat().executeQuery("select * from " + tableName);
+        ResultSet rs = this.getStat().executeQuery("select t.* from " + tableName + " t" + sql);
         List list = new ArrayList();
         while (rs.next()) {
             Object newTableModel = getAnyTableModel(obj);
@@ -50,18 +55,159 @@ public class DataBaseBean extends DataBaseSet {
         close();
         return list;
     }
-    
+
     /**
-     * 通过简单的命令（sql）来过滤list中符合条件（obj）的内容
+     * 通过简单的命令（sql）来过滤list中符合条件（obj）的内容 flag为0时采用解析SQL，为1时采用标准sql
+     *
      * @param list
      * @param sql
      * @param obj
      * @return
-     * @throws Exception 
+     * @throws Exception
      */
-    public List checkObject(List list,String sql,Object obj) throws Exception{
+    public List selectObject(String sql) throws Exception {
         //TODO:
-        return list;
+        connect();
+        List<Object> retList = new ArrayList<Object>();
+        ResultSet rs = this.getStat().executeQuery(sql);
+        int colmax = rs.getMetaData().getColumnCount();
+        while (rs.next()) {
+            Object[] obj = new Object[colmax];
+            for (int col = 1; col <= colmax; col++) {
+                obj[col] = rs.getObject(col);
+            }
+            retList.add(obj);
+        }
+        close();
+        return retList;
+    }
+
+    /**
+     * 保存方法，如果对象的mainKey有值，则计算为修改，否则计算为新增
+     *
+     * @param obj
+     * @throws Exception
+     */
+    @SuppressWarnings("CallToThreadDumpStack")
+    public void save(Object obj) throws Exception {
+        connect();
+        String keyName = null;//设置主键名
+        String keyValue = null;//设置主键值
+
+        String tableName = getTableName(obj);
+
+        Object newTableModel = getAnyTableModel(obj);
+
+        String[][] getParamets = getTableAllColnum(newTableModel);
+        String inster = null;
+        String values = null;
+        for (String[] para : getParamets) {
+            if (!para[0].equals("tableName") && !para[2].equals("mainKey")) {
+                if (inster == null) {
+                    inster = para[1];
+                    values = "?";
+                } else {
+                    inster = inster + "," + para[1];
+                    values = values + ",?";
+                }
+            }
+            if (para[2].equals("mainKey")) {
+                Object getValue = this.getNameValue(obj, para[0]);
+                if (getValue != null) {
+                    keyName = para[1];
+                    keyValue = getValue.toString();
+                }
+            }
+        }
+
+        //如果找不到主键则插入
+        if (keyValue == null) {
+            System.out.println("insert into " + tableName + "(" + inster + ")" + " values (" + values + ");");
+            PreparedStatement prep = this.getConn().prepareStatement(
+                    "insert into " + tableName + "(" + inster + ")" + " values (" + values + ");");
+
+            int col = 1;
+            for (String[] para : getParamets) {
+                if (para[2].equals("String")) {
+                    Object getValue = this.getNameValue(obj, para[0]);
+                    if (getValue != null) {
+                        prep.setString(col, getValue.toString());
+                    }
+                    col++;
+                } else if (para[2].equals("Double")) {
+                    Object getValue = this.getNameValue(obj, para[0]);
+                    if (getValue != null) {
+                        prep.setDouble(col, Double.parseDouble(getValue.toString()));
+                    }
+                    col++;
+                }
+            }
+            prep.addBatch();
+            this.getConn().setAutoCommit(false);
+            prep.executeBatch();
+            this.getConn().setAutoCommit(true);
+        } else {
+            //拥有主键则更新
+            List getList = this.selectObject(obj.getClass(), " where " + keyName + "=" + keyValue);
+            Object oldObj = getList.get(0);
+
+            List<Object[]> list = new ArrayList<Object[]>();
+            for (String[] para : getParamets) {
+                Object oldValue = this.getNameValue(oldObj, para[0]);
+                if (oldValue == null) {
+                    oldValue = "";
+                }
+                Object newValue = this.getNameValue(obj, para[0]);
+                if (newValue == null) {
+                    newValue = "";
+                }
+                if (!oldValue.equals(newValue)) {
+                    Object[] objectValue = new Object[]{
+                        para[1],
+                        para[2],
+                        newValue
+                    };
+                    list.add(objectValue);
+                }
+            }
+            if(list.isEmpty()){
+                System.out.println("没有修改，放弃保存");
+                return;
+            }
+            try {
+                String updateStringBefore = "update " + tableName + " set ";
+                String updateStringLast = null;
+                if (list.size() > 0) {
+                    for (Object[] getObjectValues : list) {
+                        if (updateStringLast == null) {
+                            updateStringLast = getObjectValues[0].toString()+" = " + getUpdate(getObjectValues[2], getObjectValues[1].toString());
+                        } else {
+                            updateStringLast = updateStringLast + " , " + getObjectValues[0].toString()+ " = " + getUpdate(getObjectValues[2], getObjectValues[1].toString());
+                        }
+                    }
+                }
+                String updateStringEnd = " where " + keyName + "=" + keyValue;
+                close();//关闭连接准备好储存
+                connect();//重新打开连接
+                System.out.println(updateStringBefore + updateStringLast + updateStringEnd);
+                this.getConn().setAutoCommit(false);
+                this.getStat().executeUpdate(updateStringBefore + updateStringLast + updateStringEnd);
+                this.getStat().executeBatch();
+                this.getConn().setAutoCommit(true);
+            } catch (Exception e) {
+                System.out.println("保存失败!");
+                e.printStackTrace();
+            }
+        }
+        close();
+    }
+
+    private Object getUpdate(Object paramets, String paramet) {
+        if (paramet.equals("String")) {
+            return "'" + paramets + "'";
+        } else {
+            return paramets;
+        }
     }
 
     /**
@@ -192,9 +338,15 @@ public class DataBaseBean extends DataBaseSet {
     public static void main(String[] arg0) throws Exception {
         DataBaseBean dataBaseBean = new DataBaseBean();
         UserInfo userInfo = new UserInfo();
-        List list = dataBaseBean.selectObject(userInfo);
+        userInfo.setPid("2");
+        userInfo.setCode("444");
+        userInfo.setName("some");
+        userInfo.setPassword("img");
+        dataBaseBean.save(userInfo);
+
+        List list = dataBaseBean.selectObject(UserInfo.class, " where t.F_USER_CODE = '444'");
         for (Object get : list) {
-            UserInfo getUser=(UserInfo)get;
+            UserInfo getUser = (UserInfo) get;
             System.out.println(getUser.getPid());
             System.out.println(getUser.getName());
             System.out.println(getUser.getCode());
