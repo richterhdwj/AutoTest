@@ -170,7 +170,7 @@ public class DataBaseBean extends DataBaseSet {
                     list.add(objectValue);
                 }
             }
-            if(list.isEmpty()){
+            if (list.isEmpty()) {
                 System.out.println("没有修改，放弃保存");
                 return;
             }
@@ -180,9 +180,9 @@ public class DataBaseBean extends DataBaseSet {
                 if (list.size() > 0) {
                     for (Object[] getObjectValues : list) {
                         if (updateStringLast == null) {
-                            updateStringLast = getObjectValues[0].toString()+" = " + getUpdate(getObjectValues[2], getObjectValues[1].toString());
+                            updateStringLast = getObjectValues[0].toString() + " = " + getUpdate(getObjectValues[2], getObjectValues[1].toString());
                         } else {
-                            updateStringLast = updateStringLast + " , " + getObjectValues[0].toString()+ " = " + getUpdate(getObjectValues[2], getObjectValues[1].toString());
+                            updateStringLast = updateStringLast + " , " + getObjectValues[0].toString() + " = " + getUpdate(getObjectValues[2], getObjectValues[1].toString());
                         }
                     }
                 }
@@ -202,12 +202,67 @@ public class DataBaseBean extends DataBaseSet {
         close();
     }
 
+    /**
+     * 修改时的属性值的判断
+     *
+     * @param paramets
+     * @param paramet
+     * @return
+     */
     private Object getUpdate(Object paramets, String paramet) {
         if (paramet.equals("String")) {
             return "'" + paramets + "'";
         } else {
             return paramets;
         }
+    }
+
+    /**
+     * 删除表（obj）通过obj中设置的mainKey值
+     *
+     * @param obj
+     * @return
+     */
+    public void delete(Object obj) throws Exception {
+        String tableName = getTableName(obj);
+        String keyName = null;
+        String keyValue = null;
+        String[][] getParamets = getTableAllColnum(obj);
+        String inster = null;
+        String values = null;
+        for (String[] para : getParamets) {
+            if (!para[0].equals("tableName") && !para[2].equals("mainKey")) {
+                if (inster == null) {
+                    inster = para[1];
+                    values = "?";
+                } else {
+                    inster = inster + "," + para[1];
+                    values = values + ",?";
+                }
+            }
+            if (para[2].equals("mainKey")) {
+                Object getValue = this.getNameValue(obj, para[0]);
+                if (getValue != null) {
+                    keyName = para[1];
+                    keyValue = getValue.toString();
+                }
+            }
+        }
+        List list = this.selectObject(obj.getClass(), " where t." + keyName + " = " + keyValue);
+        if (list.size() == 0) {
+            System.out.println("要删除的数据不存在");
+            return;
+        } else {
+            String sql="delete "+tableName+" where "+keyName+" = "+keyValue;
+            System.out.println(sql);
+            connect();
+            this.getConn().setAutoCommit(false);
+            this.getStat().executeUpdate(sql);
+            this.getStat().executeBatch();
+            this.getConn().setAutoCommit(true);
+            close();
+        }
+        System.out.println("删除成功");
     }
 
     /**
@@ -342,7 +397,7 @@ public class DataBaseBean extends DataBaseSet {
         userInfo.setCode("444");
         userInfo.setName("some");
         userInfo.setPassword("img");
-        dataBaseBean.save(userInfo);
+        dataBaseBean.delete(userInfo);
 
         List list = dataBaseBean.selectObject(UserInfo.class, " where t.F_USER_CODE = '444'");
         for (Object get : list) {
