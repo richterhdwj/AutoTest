@@ -11,8 +11,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
-import support.DataBaseSet;
-import support.databaseModel.UserInfo;
 
 /**
  * 一切新增、删除、修改、查询的方法都存在这里
@@ -249,11 +247,11 @@ public class DataBaseBean extends DataBaseSet {
             }
         }
         List list = this.selectObject(obj.getClass(), " where t." + keyName + " = " + keyValue);
-        if (list.size() == 0) {
+        if (list.isEmpty()) {
             System.out.println("要删除的数据不存在");
             return;
         } else {
-            String sql="delete "+tableName+" where "+keyName+" = "+keyValue;
+            String sql="delete from "+tableName+" where "+keyName+" = "+keyValue;
             System.out.println(sql);
             connect();
             this.getConn().setAutoCommit(false);
@@ -306,7 +304,7 @@ public class DataBaseBean extends DataBaseSet {
      * @return
      * @throws Exception
      */
-    private String[][] getTableAllColnum(Object obj) throws Exception {
+    public String[][] getTableAllColnum(Object obj) throws Exception {
         String[][] tableSet = null;
         try {
             tableSet = (String[][]) getNameValue(obj, "TableModelSet");
@@ -386,29 +384,6 @@ public class DataBaseBean extends DataBaseSet {
             System.out.println(obj.getClass().getName() + "类中没有set"
                     + mothodName.substring(0, 1).toUpperCase() + mothodName.substring(1)
                     + "的方法");
-        }
-    }
-
-//    @SuppressWarnings("unchecked")
-    public static void main(String[] arg0) throws Exception {
-        DataBaseBean dataBaseBean = new DataBaseBean();
-        UserInfo userInfo = new UserInfo();
-        userInfo.setPid("2");
-        userInfo.setCode("444");
-        userInfo.setName("some");
-        userInfo.setPassword("img");
-        dataBaseBean.delete(userInfo);
-
-        List list = dataBaseBean.selectObject(UserInfo.class, " where t.F_USER_CODE = '444'");
-        for (Object get : list) {
-            UserInfo getUser = (UserInfo) get;
-            System.out.println(getUser.getPid());
-            System.out.println(getUser.getName());
-            System.out.println(getUser.getCode());
-            System.out.println(getUser.getPassword());
-            System.out.println(getUser.getSysFlag());
-            System.out.println(getUser.getCreateTime());
-            System.out.println(getUser.getTableName());
         }
     }
 }
