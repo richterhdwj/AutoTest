@@ -13,9 +13,11 @@ import javafx.collections.ObservableList;
 import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.control.ComboBox;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import support.tableView.TableViewColumnSet;
 import support.tableView.TableViewCustom;
@@ -34,18 +36,20 @@ public class TableSample extends Application {
         Group root = new Group();
         primaryStage.setWidth(400);
         primaryStage.setHeight(200);
-        primaryStage.setScene(new Scene(root));
+        primaryStage.setScene(new Scene(root,400,200));
         List<Person> data = new ArrayList<Person>();
             data.add(new Person("Jacob",     "Smith",    "jacob.smith@example.com"));
             data.add(new Person("Isabella",  "Johnson",  "isabella.johnson@example.com"));
             data.add(new Person("Ethan",     "Williams", "ethan.williams@example.com"));
             data.add(new Person("Emma",      "Jones",    "emma.jones@example.com" ));
             data.add(new Person("Michael",   "Brown",    "michael.brown@example.com"));
-        ModelBase.setCheckBoxs(data, null,null);
+        ModelBase.setCheckBoxs(data, null,true);
         Person personSet=(Person)ModelBase.getListOne(data);
         TableViewCustom tableView = new TableViewCustom(personSet,primaryStage,"write");
         tableView.setTableViewColumn();
         TableView setTableViewData = tableView.setTableViewData(data);
+        tableView.getTableViewCustom().autosize();
+        tableView.getTableViewCustom().setPrefSize(400, 180);
         root.getChildren().add(tableView.getTableViewCustom());
     }
 

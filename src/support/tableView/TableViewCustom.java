@@ -171,12 +171,24 @@ public class TableViewCustom extends TableView {
         Double widthThis = node.getWidth();
         int col = 0;
         for (TableViewColumnSet tableViewSet : getTableViewSet) {
-            if (tableViewSet.getTypeName().equals("checkBox")) {
-                widthThis = widthThis - 20;
-            } else if (tableViewSet.getColWidth() != null) {
-                widthThis = widthThis - tableViewSet.getColWidth();
-            } else {
-                col++;
+            if(isRead){
+                if(tableViewSet.isIsRead())
+                    if (tableViewSet.getTypeName().equals("checkBox")) {
+                        widthThis = widthThis - 20;
+                    } else if (tableViewSet.getColWidth() != null) {
+                        widthThis = widthThis - tableViewSet.getColWidth();
+                    } else {
+                        col++;
+                    }
+            }else{
+                if(tableViewSet.isIsWrite())
+                    if (tableViewSet.getTypeName().equals("checkBox")) {
+                        widthThis = widthThis - 20;
+                    } else if (tableViewSet.getColWidth() != null) {
+                        widthThis = widthThis - tableViewSet.getColWidth();
+                    } else {
+                        col++;
+                    }
             }
         }
         widthThis = widthThis / col;
@@ -236,10 +248,12 @@ public class TableViewCustom extends TableView {
                     }
                 }
             }
+            tableViewcenter.setObj(tableValue);
+            
             data.add(tableViewcenter);
         }
         tableViewCustom.setItems(data);
-
+        
         return tableViewCustom;
     }
 
