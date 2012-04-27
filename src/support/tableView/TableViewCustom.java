@@ -4,13 +4,12 @@
  */
 package support.tableView;
 
+import java.util.HashMap;
 import java.util.List;
-import javafx.beans.property.SimpleObjectProperty;
-import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.*;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.scene.control.Button;
-import javafx.scene.control.CheckBox;
+import javafx.scene.Node;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
@@ -31,7 +30,11 @@ public class TableViewCustom extends TableView {
     private Double width;               //获取整体宽度
     private boolean isRead = true;      //判断是否建立的为查看表还是编辑表
     private TableViewColumnSet[] getTableViewSet; //通过结构得到表格建立说明
-    private Object getTableClass;
+    private Object getTableClass;       //结构预存值。
+    private int nameNum = 0;                //表示表格内有多少个字符展示格
+    private int doubleNum = 0;              //表示表格内有多少个数字展示格
+    private int objNum = 0;                 //表示表格内有多少个其他类型展示格
+    private HashMap hashMap;              //存储临时空间中的字段对应关系
 
     /**
      * 当flag为read的时候，取tableObject的read()方法的数据， 而为write的时候，则取write()方法的数据
@@ -56,20 +59,29 @@ public class TableViewCustom extends TableView {
     }
 
     /**
-     * 首先设置表格所需要的列
+     * 首先设置表格所需要的列,也是用于重置数据的第一步
      */
     public void setTableViewColumn() {
         /**
          * 清空已有的数据
          */
+        nameNum = 0;
+        objNum = 0;
+        doubleNum = 0;
         tableViewCustom.getColumns().clear();
         tableViewCustom.getItems().clear();
         /**
          * 获取每列数据的宽度
          */
-        Double autoWidth=this.getTableViewColumnWidth();
+        Double autoWidth = this.getTableViewColumnWidth();
+        hashMap = new HashMap();
+        int maxCol = 0;
         //设置表头属性
         for (TableViewColumnSet tableViewSet : getTableViewSet) {
+            if(!isRead){
+                if(!tableViewSet.isIsWrite())
+                    continue;
+            };
             /**
              * 首先画出表格列
              */
@@ -81,86 +93,167 @@ public class TableViewCustom extends TableView {
             } else {
                 if (tableViewSet.getColWidth() != null) {
                     newSomeObjectCol.setPrefWidth(tableViewSet.getColWidth());
-                }else{
+                } else {
                     newSomeObjectCol.setPrefWidth(autoWidth);
                 }
             }
 
-            newSomeObjectCol.setCellValueFactory(new PropertyValueFactory(tableViewSet.getTypeName()));
+            String nowColName = null;
+            if (isRead) {
+                if(tableViewSet.isIsRead()){
+                    nowColName = getParametTypeNameRead(tableViewSet.getTypeName());
+                    hashMap.put(maxCol++, nowColName);
+                }
+            } else {
+                if(tableViewSet.isIsWrite()){
+                    nowColName = getParametTypeNameWrite(tableViewSet.getValueType(), tableViewSet.getValue());
+                    hashMap.put(maxCol++, nowColName);
+                }
+            }
+
+            newSomeObjectCol.setCellValueFactory(new PropertyValueFactory(nowColName));
             /**
              * 将生成的列塞入表结构中
              */
             tableViewCustom.getColumns().add(newSomeObjectCol);
         }
     }
-    
+
+    private String getParametTypeNameRead(String parametType) {
+        String ret = null;
+        if (parametType == null) {
+            ret = TableViewCenterNames.stringName[nameNum];
+            nameNum++;
+        } else if (parametType.equals("Note")) {
+            ret = TableViewCenterNames.objectName[objNum];
+            objNum++;
+        } else if (parametType.equals("checkbox")) {
+            ret = TableViewCenterNames.objectName[objNum];
+            objNum++;
+        } else {
+            ret = TableViewCenterNames.stringName[nameNum];
+            nameNum++;
+        }
+        return ret;
+    }
+
+    private String getParametTypeNameWrite(Node parametType, Object value) {
+        String ret = null;
+        if (parametType == null) {
+            if (value != null) {
+                if (value.getClass().isInstance(new String())) {
+                    ret = TableViewCenterNames.stringName[nameNum];
+                    nameNum++;
+                } else if (value.getClass().isInstance(Double.TYPE)) {
+                    ret = TableViewCenterNames.doubleName[nameNum];
+                    doubleNum++;
+                } else {
+                    ret = TableViewCenterNames.stringName[nameNum];
+                    nameNum++;
+                }
+            } else {
+                ret = TableViewCenterNames.stringName[nameNum];
+                nameNum++;
+            }
+        } else {
+            ret = TableViewCenterNames.objectName[objNum];
+            objNum++;
+        }
+        return ret;
+    }
+
     /**
      * 获取默认列宽，如果每列剩余宽度不足80的话，则设为80
-     * @return 
+     *
+     * @return
      */
-    private Double getTableViewColumnWidth(){
-        Double width=node.getWidth();
-        int col=0;
-        for(TableViewColumnSet tableViewSet : getTableViewSet){
+    private Double getTableViewColumnWidth() {
+        Double widthThis = node.getWidth();
+        int col = 0;
+        for (TableViewColumnSet tableViewSet : getTableViewSet) {
             if (tableViewSet.getTypeName().equals("checkBox")) {
-                width=width-20;
-            }else if (tableViewSet.getColWidth() != null) {
-                width=width-tableViewSet.getColWidth();
+                widthThis = widthThis - 20;
+            } else if (tableViewSet.getColWidth() != null) {
+                widthThis = widthThis - tableViewSet.getColWidth();
+            } else {
+                col++;
             }
-            col++;
         }
-        width=width/col;
-        if(width<80){
-            width=80.0;
+        widthThis = widthThis / col;
+        if (widthThis < 80) {
+            widthThis = 80.0;
         }
-        return width;
+        return widthThis;
     }
 
     /**
      * 然后塞入所需要的数据
      */
-    public void setTableViewData(List list) throws Exception{
+    public TableView setTableViewData(List list) throws Exception {
         ObservableList data = FXCollections.observableArrayList();
         /**
          * 设定object类型参数tablevalue，循环获取list内的值
          */
         for (Object tableValue : list) {
             //判断塞入的列表值是否和表头一样
-            if (!tableValue.getClass().isInstance(getTableClass)){
+            if (!tableValue.getClass().isInstance(getTableClass)) {
                 data.clear();
                 throw new Exception("塞入的列表值与列表表头设定的不一致。");
             }
-            //设定一个临时的getInTableValue参数用于获取相应的列表参数值
-            Object[] getInTableValue = new Object[getTableViewSet.length];
-            
+            //成功的话依据当前结构值重新获取一次列表设置
+            Class paramets[] = new Class[0];
+            Object obj[] = new Object[0];
+            if (isRead) {
+                getTableViewSet = (TableViewColumnSet[]) tableValue.getClass().getMethod("read", paramets).invoke(tableValue, obj);
+            } else {
+                getTableViewSet = (TableViewColumnSet[]) tableValue.getClass().getMethod("read", paramets).invoke(tableValue, obj);
+            }
+            //所有表都通过的TableViewCenter类来展示
+            TableViewCenter tableViewcenter = new TableViewCenter();
+
             //循环之前在设定表头时获取到的列表参数设置值
-            int col=0;
+            int col = 0;
             for (TableViewColumnSet tableViewSet : getTableViewSet) {
-                if(isRead){
+                if (isRead) {
                     //设定列表为阅读时的参数值
-                    if(tableViewSet.isIsRead()){
-                        if(tableViewSet.getTypeName().equals("checkbox")){
-                            CheckBox check = new CheckBox();
-                            check.setId(tableViewSet.getColName());
-                            check.setSelected(false);
-                            getInTableValue[col]=new SimpleObjectProperty<CheckBox>(check);
-                        }else if(tableViewSet.getTypeName().equals("button")){
-                            getInTableValue[col]=new SimpleObjectProperty(tableViewSet.getValueType());
-                        }else{
-                            getInTableValue[col]=new SimpleStringProperty(tableViewSet.getValue().toString());
+                    if (tableViewSet.isIsRead()) {
+                        if (tableViewSet.getTypeName().equals("checkbox") || tableViewSet.getTypeName().equals("Node")) {
+                            tableViewcenter.setAnyObject((String) this.hashMap.get(col), tableViewSet.getValueType());
+                        } else {
+                            tableViewcenter.setAnyObject((String) this.hashMap.get(col), tableViewSet.getValue().toString());
                         }
+                        col++;
                     }
-                }else{
+                } else {
                     //设定列表为可写时的参数值
-                    if(tableViewSet.isIsWrite()){
-                        //TODO:
+                    if (tableViewSet.isIsWrite()) {
+                        if (tableViewSet.getValueType() == null) {
+                            tableViewcenter.setAnyObject((String) this.hashMap.get(col), tableViewSet.getValue().toString());
+                        } else {
+                            tableViewcenter.setAnyObject((String) this.hashMap.get(col), tableViewSet.getValueType());
+                        }
+                        col++;
                     }
                 }
-                col++;
             }
-            data.add(getInTableValue);
+            data.add(tableViewcenter);
         }
         tableViewCustom.setItems(data);
+
+        return tableViewCustom;
+    }
+
+    /**
+     * *
+     */
+    private Object getNameValue(Object obj, String getName) {
+        Object ret = null;
+        try {
+            ret = obj.getClass().getMethod("get" + getName.substring(0, 1).toUpperCase() + getName.substring(1), (Class<?>) null);
+        } catch (Exception e) {
+            System.out.println(obj.getClass().getName() + "里面没有" + "get" + getName.substring(0, 1).toUpperCase() + getName.substring(1) + "方法");
+        }
+        return ret;
     }
 
     public TableView getTableViewCustom() {
@@ -169,5 +262,589 @@ public class TableViewCustom extends TableView {
 
     public void setTableViewCustom(TableView tableViewCustom) {
         this.tableViewCustom = tableViewCustom;
+    }
+
+    private static class TableViewCenterNames {
+
+        static final String[] stringName = new String[]{
+            "name1", "name2", "name3", "name4", "name5", "name6", "name7", "name8", "name9", "name10",
+            "name11", "name12", "name13", "name14", "name15", "name16", "name17", "name18", "name19", "name20"
+        };
+        static final String[] doubleName = new String[]{
+            "double1", "double2", "double3", "double4", "double5", "double6", "double7", "double8", "double9", "double10",
+            "double11", "double12", "double13", "double14", "double15", "double16", "double17", "double18", "double19", "double20"
+        };
+        static final String[] objectName = new String[]{
+            "obj1", "obj2", "obj3", "obj4", "obj5", "obj6", "obj7", "obj8", "obj9", "obj10",
+            "obj11", "obj12", "obj13", "obj14", "obj15", "obj16", "obj17", "obj18", "obj19", "obj20",};
+    }
+
+    public class TableViewCenter {
+
+        private StringProperty name1;
+        private StringProperty name2;
+        private StringProperty name3;
+        private StringProperty name4;
+        private StringProperty name5;
+        private StringProperty name6;
+        private StringProperty name7;
+        private StringProperty name8;
+        private StringProperty name9;
+        private StringProperty name10;
+        private StringProperty name11;
+        private StringProperty name12;
+        private StringProperty name13;
+        private StringProperty name14;
+        private StringProperty name15;
+        private StringProperty name16;
+        private StringProperty name17;
+        private StringProperty name18;
+        private StringProperty name19;
+        private StringProperty name20;
+        private DoubleProperty double1;
+        private DoubleProperty double2;
+        private DoubleProperty double3;
+        private DoubleProperty double4;
+        private DoubleProperty double5;
+        private DoubleProperty double6;
+        private DoubleProperty double7;
+        private DoubleProperty double8;
+        private DoubleProperty double9;
+        private DoubleProperty double10;
+        private DoubleProperty double11;
+        private DoubleProperty double12;
+        private DoubleProperty double13;
+        private DoubleProperty double14;
+        private DoubleProperty double15;
+        private DoubleProperty double16;
+        private DoubleProperty double17;
+        private DoubleProperty double18;
+        private DoubleProperty double19;
+        private DoubleProperty double20;
+        private ObjectProperty obj1;
+        private ObjectProperty obj2;
+        private ObjectProperty obj3;
+        private ObjectProperty obj4;
+        private ObjectProperty obj5;
+        private ObjectProperty obj6;
+        private ObjectProperty obj7;
+        private ObjectProperty obj8;
+        private ObjectProperty obj9;
+        private ObjectProperty obj10;
+        private ObjectProperty obj11;
+        private ObjectProperty obj12;
+        private ObjectProperty obj13;
+        private ObjectProperty obj14;
+        private ObjectProperty obj15;
+        private ObjectProperty obj16;
+        private ObjectProperty obj17;
+        private ObjectProperty obj18;
+        private ObjectProperty obj19;
+        private ObjectProperty obj20;
+        private Object obj;
+
+        public StringProperty name1Property() {
+            return name1;
+        }
+
+        public StringProperty name2Property() {
+            return name2;
+        }
+
+        public StringProperty name3Property() {
+            return name3;
+        }
+
+        public StringProperty name4Property() {
+            return name4;
+        }
+
+        public StringProperty name5Property() {
+            return name5;
+        }
+
+        public StringProperty name6Property() {
+            return name6;
+        }
+
+        public StringProperty name7Property() {
+            return name7;
+        }
+
+        public StringProperty name8Property() {
+            return name8;
+        }
+
+        public StringProperty name9Property() {
+            return name9;
+        }
+
+        public StringProperty name10Property() {
+            return name10;
+        }
+
+        public StringProperty name11Property() {
+            return name11;
+        }
+
+        public StringProperty name12Property() {
+            return name12;
+        }
+
+        public StringProperty name13Property() {
+            return name13;
+        }
+
+        public StringProperty name14Property() {
+            return name14;
+        }
+
+        public StringProperty name15Property() {
+            return name15;
+        }
+
+        public StringProperty name16Property() {
+            return name16;
+        }
+
+        public StringProperty name17Property() {
+            return name17;
+        }
+
+        public StringProperty name18Property() {
+            return name18;
+        }
+
+        public StringProperty name19Property() {
+            return name19;
+        }
+
+        public StringProperty name20Property() {
+            return name20;
+        }
+
+        public DoubleProperty double1Property() {
+            return double1;
+        }
+
+        public DoubleProperty double2Property() {
+            return double2;
+        }
+
+        public DoubleProperty double3Property() {
+            return double3;
+        }
+
+        public DoubleProperty double4Property() {
+            return double4;
+        }
+
+        public DoubleProperty double5Property() {
+            return double5;
+        }
+
+        public DoubleProperty double6Property() {
+            return double6;
+        }
+
+        public DoubleProperty double7Property() {
+            return double7;
+        }
+
+        public DoubleProperty double8Property() {
+            return double8;
+        }
+
+        public DoubleProperty double9Property() {
+            return double9;
+        }
+
+        public DoubleProperty double10Property() {
+            return double10;
+        }
+
+        public DoubleProperty double11Property() {
+            return double11;
+        }
+
+        public DoubleProperty double12Property() {
+            return double12;
+        }
+
+        public DoubleProperty double13Property() {
+            return double13;
+        }
+
+        public DoubleProperty double14Property() {
+            return double14;
+        }
+
+        public DoubleProperty double15Property() {
+            return double15;
+        }
+
+        public DoubleProperty double16Property() {
+            return double16;
+        }
+
+        public DoubleProperty double17Property() {
+            return double17;
+        }
+
+        public DoubleProperty double18Property() {
+            return double18;
+        }
+
+        public DoubleProperty double19Property() {
+            return double19;
+        }
+
+        public DoubleProperty double20Property() {
+            return double20;
+        }
+
+        public ObjectProperty obj1Property() {
+            return obj1;
+        }
+
+        public ObjectProperty obj2Property() {
+            return obj2;
+        }
+
+        public ObjectProperty obj3Property() {
+            return obj3;
+        }
+
+        public ObjectProperty obj4Property() {
+            return obj4;
+        }
+
+        public ObjectProperty obj5Property() {
+            return obj5;
+        }
+
+        public ObjectProperty obj6Property() {
+            return obj6;
+        }
+
+        public ObjectProperty obj7Property() {
+            return obj7;
+        }
+
+        public ObjectProperty obj8Property() {
+            return obj8;
+        }
+
+        public ObjectProperty obj9Property() {
+            return obj9;
+        }
+
+        public ObjectProperty obj10Property() {
+            return obj10;
+        }
+
+        public ObjectProperty obj11Property() {
+            return obj11;
+        }
+
+        public ObjectProperty obj12Property() {
+            return obj12;
+        }
+
+        public ObjectProperty obj13Property() {
+            return obj13;
+        }
+
+        public ObjectProperty obj14Property() {
+            return obj14;
+        }
+
+        public ObjectProperty obj15Property() {
+            return obj15;
+        }
+
+        public ObjectProperty obj16Property() {
+            return obj16;
+        }
+
+        public ObjectProperty obj17Property() {
+            return obj17;
+        }
+
+        public ObjectProperty obj18Property() {
+            return obj18;
+        }
+
+        public ObjectProperty obj19Property() {
+            return obj19;
+        }
+
+        public ObjectProperty obj20Property() {
+            return obj20;
+        }
+
+        public void setDouble1(Double double1) {
+            this.double1 = new SimpleDoubleProperty(double1);
+        }
+
+        public void setDouble10(Double double10) {
+            this.double10 = new SimpleDoubleProperty(double10);
+        }
+
+        public void setDouble11(Double double11) {
+            this.double11 = new SimpleDoubleProperty(double11);
+        }
+
+        public void setDouble12(Double double12) {
+            this.double12 = new SimpleDoubleProperty(double12);
+        }
+
+        public void setDouble13(Double double13) {
+            this.double13 = new SimpleDoubleProperty(double13);
+        }
+
+        public void setDouble14(Double double14) {
+            this.double14 = new SimpleDoubleProperty(double14);
+        }
+
+        public void setDouble15(Double double15) {
+            this.double15 = new SimpleDoubleProperty(double15);
+        }
+
+        public void setDouble16(Double double16) {
+            this.double16 = new SimpleDoubleProperty(double16);
+        }
+
+        public void setDouble17(Double double17) {
+            this.double17 = new SimpleDoubleProperty(double17);
+        }
+
+        public void setDouble18(Double double18) {
+            this.double18 = new SimpleDoubleProperty(double18);
+        }
+
+        public void setDouble19(Double double19) {
+            this.double19 = new SimpleDoubleProperty(double19);
+        }
+
+        public void setDouble2(Double double2) {
+            this.double2 = new SimpleDoubleProperty(double2);
+        }
+
+        public void setDouble20(Double double20) {
+            this.double20 = new SimpleDoubleProperty(double20);
+        }
+
+        public void setDouble3(Double double3) {
+            this.double3 = new SimpleDoubleProperty(double3);
+        }
+
+        public void setDouble4(Double double4) {
+            this.double4 = new SimpleDoubleProperty(double4);
+        }
+
+        public void setDouble5(Double double5) {
+            this.double5 = new SimpleDoubleProperty(double5);
+        }
+
+        public void setDouble6(Double double6) {
+            this.double6 = new SimpleDoubleProperty(double6);
+        }
+
+        public void setDouble7(Double double7) {
+            this.double7 = new SimpleDoubleProperty(double7);
+        }
+
+        public void setDouble8(Double double8) {
+            this.double8 = new SimpleDoubleProperty(double8);
+        }
+
+        public void setDouble9(Double double9) {
+            this.double9 = new SimpleDoubleProperty(double9);
+        }
+
+        /**
+         * ***********************************************************************
+         */
+        public void setName1(String name1) {
+            this.name1 = new SimpleStringProperty(name1);
+        }
+
+        public void setName10(String name10) {
+            this.name10 = new SimpleStringProperty(name10);
+        }
+
+        public void setName11(String name11) {
+            this.name11 = new SimpleStringProperty(name11);
+        }
+
+        public void setName12(String name12) {
+            this.name12 = new SimpleStringProperty(name12);
+        }
+
+        public void setName13(String name13) {
+            this.name13 = new SimpleStringProperty(name13);
+        }
+
+        public void setName14(String name14) {
+            this.name14 = new SimpleStringProperty(name14);
+        }
+
+        public void setName15(String name15) {
+            this.name15 = new SimpleStringProperty(name15);
+        }
+
+        public void setName16(String name16) {
+            this.name16 = new SimpleStringProperty(name16);
+        }
+
+        public void setName17(String name17) {
+            this.name17 = new SimpleStringProperty(name17);
+        }
+
+        public void setName18(String name18) {
+            this.name18 = new SimpleStringProperty(name18);
+        }
+
+        public void setName19(String name19) {
+            this.name19 = new SimpleStringProperty(name19);
+        }
+
+        public void setName2(String name2) {
+            this.name2 = new SimpleStringProperty(name2);
+        }
+
+        public void setName20(String name20) {
+            this.name20 = new SimpleStringProperty(name20);
+        }
+
+        public void setName3(String name3) {
+            this.name3 = new SimpleStringProperty(name3);
+        }
+
+        public void setName4(String name4) {
+            this.name4 = new SimpleStringProperty(name4);
+        }
+
+        public void setName5(String name5) {
+            this.name5 = new SimpleStringProperty(name5);
+        }
+
+        public void setName6(String name6) {
+            this.name6 = new SimpleStringProperty(name6);
+        }
+
+        public void setName7(String name7) {
+            this.name7 = new SimpleStringProperty(name7);
+        }
+
+        public void setName8(String name8) {
+            this.name8 = new SimpleStringProperty(name8);
+        }
+
+        public void setName9(String name9) {
+            this.name9 = new SimpleStringProperty(name9);
+        }
+
+        /**
+         * *********************************************************************
+         */
+        public void setObj1(Object obj1) {
+            this.obj1 = new SimpleObjectProperty(obj1);
+        }
+
+        public void setObj10(Object obj10) {
+            this.obj10 = new SimpleObjectProperty(obj10);
+        }
+
+        public void setObj11(Object obj11) {
+            this.obj11 = new SimpleObjectProperty(obj11);
+        }
+
+        public void setObj12(Object obj12) {
+            this.obj12 = new SimpleObjectProperty(obj12);
+        }
+
+        public void setObj13(Object obj13) {
+            this.obj13 = new SimpleObjectProperty(obj13);
+        }
+
+        public void setObj14(Object obj14) {
+            this.obj14 = new SimpleObjectProperty(obj14);
+        }
+
+        public void setObj15(Object obj15) {
+            this.obj15 = new SimpleObjectProperty(obj15);
+        }
+
+        public void setObj16(Object obj16) {
+            this.obj16 = new SimpleObjectProperty(obj16);
+        }
+
+        public void setObj17(Object obj17) {
+            this.obj17 = new SimpleObjectProperty(obj17);
+        }
+
+        public void setObj18(Object obj18) {
+            this.obj18 = new SimpleObjectProperty(obj18);
+        }
+
+        public void setObj19(Object obj19) {
+            this.obj19 = new SimpleObjectProperty(obj19);
+        }
+
+        public void setObj2(Object obj2) {
+            this.obj2 = new SimpleObjectProperty(obj2);
+        }
+
+        public void setObj20(Object obj20) {
+            this.obj20 = new SimpleObjectProperty(obj20);
+        }
+
+        public void setObj3(Object obj3) {
+            this.obj3 = new SimpleObjectProperty(obj3);
+        }
+
+        public void setObj4(Object obj4) {
+            this.obj4 = new SimpleObjectProperty(obj4);
+        }
+
+        public void setObj5(Object obj5) {
+            this.obj5 = new SimpleObjectProperty(obj5);
+        }
+
+        public void setObj6(Object obj6) {
+            this.obj6 = new SimpleObjectProperty(obj6);
+        }
+
+        public void setObj7(Object obj7) {
+            this.obj7 = new SimpleObjectProperty(obj7);
+        }
+
+        public void setObj8(Object obj8) {
+            this.obj8 = new SimpleObjectProperty(obj8);
+        }
+
+        public void setObj9(Object obj9) {
+            this.obj9 = new SimpleObjectProperty(obj9);
+        }
+
+        public Object getObj() {
+            return obj;
+        }
+
+        public void setObj(Object obj) {
+            this.obj = obj;
+        }
+
+        public void setAnyObject(String parametName, Object parametValue) throws Exception {
+            if (parametName.contains("name")) {
+                this.getClass().getMethod("set" + parametName.substring(0, 1).toUpperCase() + parametName.substring(1), String.class).invoke(this, parametValue);
+            } else if (parametName.contains("double")) {
+                this.getClass().getMethod("set" + parametName.substring(0, 1).toUpperCase() + parametName.substring(1), Double.class).invoke(this, parametValue);
+            } else if (parametName.contains("obj")) {
+                this.getClass().getMethod("set" + parametName.substring(0, 1).toUpperCase() + parametName.substring(1), Object.class).invoke(this, parametValue);
+            }
+        }
     }
 }

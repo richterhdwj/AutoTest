@@ -11,12 +11,14 @@ import javafx.scene.Node;
  * @author Richter
  */
 public class TableViewColumnSet {
+    public static String checkbox="checkbox";
+    
     private String typeName;
     private String colName;
     private Double colWidth;
     private Object value;
     private boolean isRead=true;
-    private boolean isWrite=true;
+    private boolean isWrite=false;
     private Node valueType;
     private Object columnModel;
 
@@ -25,14 +27,16 @@ public class TableViewColumnSet {
         this.colName = colName;
         this.colWidth = colWidth;
         this.valueType = valueType;
+        this.value=value;
     }
     
     
-    public TableViewColumnSet(String typeName, String colName, Double colWidth, Node valueType,Boolean isRead,Boolean isWrite) {
+    public TableViewColumnSet(String typeName, String colName, Double colWidth, Node valueType,Object value,Boolean isRead,Boolean isWrite) {
         this.typeName = typeName;
         this.colName = colName;
         this.colWidth = colWidth;
         this.valueType = valueType;
+        this.value=value;
         if(isRead==null){
             this.isRead=true;
         }else{
@@ -40,7 +44,7 @@ public class TableViewColumnSet {
         }
         
         if(isWrite==null){
-            this.isWrite=true;
+            this.isWrite=false;
         }else{
             this.isWrite=isWrite;
         }

@@ -1,19 +1,24 @@
+package tempTest;
+
 /**
  * Copyright (c) 2008, 2012 Oracle and/or its affiliates.
  * All rights reserved. Use is subject to license terms.
  */
+import java.util.ArrayList;
+import java.util.List;
+import support.ModelBase;
 import javafx.application.Application;
-import javafx.scene.Group;
-import javafx.scene.Scene;
-import javafx.stage.Stage;
-import javafx.beans.property.StringProperty;
-import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.scene.Group;
+import javafx.scene.Scene;
+import javafx.scene.control.ComboBox;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
-import javafx.util.Callback;
+import javafx.stage.Stage;
+import support.tableView.TableViewColumnSet;
+import support.tableView.TableViewCustom;
 
 /**
  * A simple table with a header row.
@@ -25,50 +30,91 @@ import javafx.util.Callback;
  * @see javafx.scene.control.TableView
  */
 public class TableSample extends Application {
-    private void init(Stage primaryStage) {
+    private void init(Stage primaryStage) throws Exception {
         Group root = new Group();
+        primaryStage.setWidth(400);
+        primaryStage.setHeight(200);
         primaryStage.setScene(new Scene(root));
-        final ObservableList<Person> data = FXCollections.observableArrayList(
-            new Person("Jacob",     "Smith",    "jacob.smith@example.com",new Object() ),
-            new Person("Isabella",  "Johnson",  "isabella.johnson@example.com" ,11),
-            new Person("Ethan",     "Williams", "ethan.williams@example.com","string" ),
-            new Person("Emma",      "Jones",    "emma.jones@example.com",11.2 ),
-            new Person("Michael",   "Brown",    "michael.brown@example.com" ,new Object())
-        );
-        TableColumn firstNameCol = new TableColumn();
-        firstNameCol.setText("First");
-        firstNameCol.setPrefWidth(20);
-        firstNameCol.setCellValueFactory(new PropertyValueFactory("firstName"));
-        TableColumn lastNameCol = new TableColumn();
-        lastNameCol.setText("Last");
-        lastNameCol.setCellValueFactory(new PropertyValueFactory("lastName"));
-        TableColumn emailCol = new TableColumn();
-        emailCol.setText("Email");
-        emailCol.setMinWidth(200);
-        emailCol.setCellValueFactory(new PropertyValueFactory("email"));
-        TableView tableView = new TableView();
-        tableView.setItems(data);
-        tableView.getColumns().addAll(lastNameCol,firstNameCol, emailCol);
-        root.getChildren().add(tableView);
+        List<Person> data = new ArrayList<Person>();
+            data.add(new Person("Jacob",     "Smith",    "jacob.smith@example.com"));
+            data.add(new Person("Isabella",  "Johnson",  "isabella.johnson@example.com"));
+            data.add(new Person("Ethan",     "Williams", "ethan.williams@example.com"));
+            data.add(new Person("Emma",      "Jones",    "emma.jones@example.com" ));
+            data.add(new Person("Michael",   "Brown",    "michael.brown@example.com"));
+        ModelBase.setCheckBoxs(data, null,null);
+        Person personSet=(Person)ModelBase.getListOne(data);
+        TableViewCustom tableView = new TableViewCustom(personSet,primaryStage,"write");
+        tableView.setTableViewColumn();
+        TableView setTableViewData = tableView.setTableViewData(data);
+        root.getChildren().add(tableView.getTableViewCustom());
     }
 
-    public static class Person {
-        private StringProperty firstName;
-        private StringProperty lastName;
-        private StringProperty emails;
-        private Object obj;
+    public static class Person extends ModelBase{
+        private String name;
+        private String code;
+        private String email;
+        
+        private ComboBox comboBoxName;
 
-        private Person(String fName, String lName, String email,Object obj) {
-            this.firstName = new SimpleStringProperty(fName);
-            this.lastName = new SimpleStringProperty(lName);
-            this.emails = new SimpleStringProperty(email);
-            this.obj=obj;
+        public ComboBox getComboBoxName() {
+            return comboBoxName;
+        }
+
+        public void setComboBoxName(ComboBox comboBoxName) {
+            this.comboBoxName = comboBoxName;
         }
         
-        public StringProperty firstNameProperty() { return firstName; }
-        public StringProperty lastNameProperty() { return lastName; }
-        public StringProperty emailProperty() { return emails; }
-        public Object objProperty(){return obj;}
+        public Person(){
+            
+        }
+        
+        public Person(String name, String code, String email) {
+            this.name = name;
+            this.code = code;
+            this.email = email;
+        }
+        
+        public TableViewColumnSet[] read(){
+            comboBoxName=new ComboBox();
+            comboBoxName.setPromptText(name);
+            comboBoxName.setEditable(true);
+            comboBoxName.setItems(FXCollections.observableArrayList(
+            "Option 1", "Option 2", "Option 3",
+            "Option 4", "Option 5", "Option 6",
+            "Longer ComboBox item",
+            "Option 7", "Option 8", "Option 9",
+            "Option 10", "Option 12"));
+            setTableViewColumn(new TableViewColumnSet[]{
+              new TableViewColumnSet("name","姓名",null,comboBoxName,name,true,true),
+              new TableViewColumnSet("code","编号",60.0,null,code,true,true),
+              new TableViewColumnSet("email","邮件地址",null,null,email,true,true),
+            });
+            return this.getTableViewColsSet();
+        }
+        
+        public String getCode() {
+            return code;
+        }
+
+        public void setCode(String code) {
+            this.code = code;
+        }
+
+        public String getEmail() {
+            return email;
+        }
+
+        public void setEmail(String email) {
+            this.email = email;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public void setName(String name) {
+            this.name = name;
+        }
     }
 
     @Override public void start(Stage primaryStage) throws Exception {
