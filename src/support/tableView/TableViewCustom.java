@@ -47,7 +47,7 @@ public class TableViewCustom extends TableView {
         getTableClass = tableObject;
         tableViewCustom = new TableView();
         this.node = node;
-        width = node.getWidth();
+        width = node.getScene().getWidth();
         Class paramets[] = new Class[0];
         Object obj[] = new Object[0];
         if (flag.equals(READ)) {
@@ -61,6 +61,7 @@ public class TableViewCustom extends TableView {
     /**
      * 首先设置表格所需要的列,也是用于重置数据的第一步
      */
+    @SuppressWarnings({"unchecked","fallthrough"})
     public void setTableViewColumn() {
         /**
          * 清空已有的数据
@@ -91,10 +92,12 @@ public class TableViewCustom extends TableView {
                 newSomeObjectCol.setMaxWidth(20);
                 newSomeObjectCol.setMinWidth(20);
             } else {
-                if (tableViewSet.getColWidth() != null) {
-                    newSomeObjectCol.setPrefWidth(tableViewSet.getColWidth());
-                } else {
-                    newSomeObjectCol.setPrefWidth(autoWidth);
+                if (tableViewSet.getColWidth() != null){
+                    if (tableViewSet.getColWidth() > 0) {
+                        newSomeObjectCol.setPrefWidth(tableViewSet.getColWidth());
+                    } else if(tableViewSet.getColWidth()<0){
+                        newSomeObjectCol.setPrefWidth(autoWidth);
+                    }
                 }
             }
 
@@ -168,14 +171,14 @@ public class TableViewCustom extends TableView {
      * @return
      */
     private Double getTableViewColumnWidth() {
-        Double widthThis = node.getWidth();
+        Double widthThis = width;
         int col = 0;
         for (TableViewColumnSet tableViewSet : getTableViewSet) {
             if(isRead){
                 if(tableViewSet.isIsRead())
                     if (tableViewSet.getTypeName().equals("checkBox")) {
                         widthThis = widthThis - 20;
-                    } else if (tableViewSet.getColWidth() != null) {
+                    } else if (tableViewSet.getColWidth() != null && tableViewSet.getColWidth() > 0) {
                         widthThis = widthThis - tableViewSet.getColWidth();
                     } else {
                         col++;
@@ -184,7 +187,7 @@ public class TableViewCustom extends TableView {
                 if(tableViewSet.isIsWrite())
                     if (tableViewSet.getTypeName().equals("checkBox")) {
                         widthThis = widthThis - 20;
-                    } else if (tableViewSet.getColWidth() != null) {
+                    } else if (tableViewSet.getColWidth() != null && tableViewSet.getColWidth() > 0) {
                         widthThis = widthThis - tableViewSet.getColWidth();
                     } else {
                         col++;
@@ -201,6 +204,7 @@ public class TableViewCustom extends TableView {
     /**
      * 然后塞入所需要的数据
      */
+    @SuppressWarnings({"unchecked","fallthrough"})
     public TableView setTableViewData(List list) throws Exception {
         ObservableList data = FXCollections.observableArrayList();
         /**
@@ -763,86 +767,105 @@ public class TableViewCustom extends TableView {
         /**
          * *********************************************************************
          */
+        @SuppressWarnings({"unchecked","fallthrough"})
         public void setObj1(Object obj1) {
             this.obj1 = new SimpleObjectProperty(obj1);
         }
-
+        @SuppressWarnings({"unchecked","fallthrough"})
         public void setObj10(Object obj10) {
             this.obj10 = new SimpleObjectProperty(obj10);
         }
-
+        @SuppressWarnings({"unchecked","fallthrough"})
         public void setObj11(Object obj11) {
             this.obj11 = new SimpleObjectProperty(obj11);
         }
 
+        @SuppressWarnings({"unchecked","fallthrough"})
         public void setObj12(Object obj12) {
             this.obj12 = new SimpleObjectProperty(obj12);
         }
 
+        @SuppressWarnings({"unchecked","fallthrough"})
         public void setObj13(Object obj13) {
             this.obj13 = new SimpleObjectProperty(obj13);
         }
 
+        @SuppressWarnings({"unchecked","fallthrough"})
         public void setObj14(Object obj14) {
             this.obj14 = new SimpleObjectProperty(obj14);
         }
 
+        @SuppressWarnings({"unchecked","fallthrough"})
         public void setObj15(Object obj15) {
             this.obj15 = new SimpleObjectProperty(obj15);
         }
 
+        @SuppressWarnings({"unchecked","fallthrough"})
         public void setObj16(Object obj16) {
             this.obj16 = new SimpleObjectProperty(obj16);
         }
 
+        @SuppressWarnings({"unchecked","fallthrough"})
         public void setObj17(Object obj17) {
             this.obj17 = new SimpleObjectProperty(obj17);
         }
 
+        @SuppressWarnings({"unchecked","fallthrough"})
         public void setObj18(Object obj18) {
             this.obj18 = new SimpleObjectProperty(obj18);
         }
 
+        @SuppressWarnings({"unchecked","fallthrough"})
         public void setObj19(Object obj19) {
             this.obj19 = new SimpleObjectProperty(obj19);
         }
 
+        @SuppressWarnings({"unchecked","fallthrough"})
         public void setObj2(Object obj2) {
             this.obj2 = new SimpleObjectProperty(obj2);
         }
 
+        @SuppressWarnings({"unchecked","fallthrough"})
         public void setObj20(Object obj20) {
             this.obj20 = new SimpleObjectProperty(obj20);
         }
 
+        @SuppressWarnings({"unchecked","fallthrough"})
         public void setObj3(Object obj3) {
             this.obj3 = new SimpleObjectProperty(obj3);
         }
 
+        @SuppressWarnings({"unchecked","fallthrough"})
         public void setObj4(Object obj4) {
             this.obj4 = new SimpleObjectProperty(obj4);
         }
 
+        @SuppressWarnings({"unchecked","fallthrough"})
         public void setObj5(Object obj5) {
             this.obj5 = new SimpleObjectProperty(obj5);
         }
 
+        @SuppressWarnings({"unchecked","fallthrough"})
         public void setObj6(Object obj6) {
             this.obj6 = new SimpleObjectProperty(obj6);
         }
 
+        @SuppressWarnings({"unchecked","fallthrough"})
         public void setObj7(Object obj7) {
             this.obj7 = new SimpleObjectProperty(obj7);
         }
 
+        @SuppressWarnings({"unchecked","fallthrough"})
         public void setObj8(Object obj8) {
             this.obj8 = new SimpleObjectProperty(obj8);
         }
 
+        @SuppressWarnings({"unchecked","fallthrough"})
         public void setObj9(Object obj9) {
             this.obj9 = new SimpleObjectProperty(obj9);
         }
 
+        @SuppressWarnings({"unchecked","fallthrough"})
         public Object getObj() {
             return obj;
         }

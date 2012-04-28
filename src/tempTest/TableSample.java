@@ -34,8 +34,6 @@ import support.tableView.TableViewCustom;
 public class TableSample extends Application {
     private void init(Stage primaryStage) throws Exception {
         Group root = new Group();
-        primaryStage.setWidth(400);
-        primaryStage.setHeight(200);
         primaryStage.setScene(new Scene(root,400,200));
         List<Person> data = new ArrayList<Person>();
             data.add(new Person("Jacob",     "Smith",    "jacob.smith@example.com"));
@@ -45,12 +43,14 @@ public class TableSample extends Application {
             data.add(new Person("Michael",   "Brown",    "michael.brown@example.com"));
         ModelBase.setCheckBoxs(data, null,true);
         Person personSet=(Person)ModelBase.getListOne(data);
-        TableViewCustom tableView = new TableViewCustom(personSet,primaryStage,"write");
+        TableViewCustom tableView = new TableViewCustom(personSet,primaryStage,"read");
         tableView.setTableViewColumn();
-        TableView setTableViewData = tableView.setTableViewData(data);
-        tableView.getTableViewCustom().autosize();
-        tableView.getTableViewCustom().setPrefSize(400, 180);
-        root.getChildren().add(tableView.getTableViewCustom());
+        TableView getTableView=tableView.setTableViewData(data);
+        VBox vbox=new VBox(1);
+        vbox.setPrefSize(400,200);
+        vbox.getChildren().add(getTableView);
+        
+        root.getChildren().add(vbox);
     }
 
     public static class Person extends ModelBase{
@@ -78,6 +78,7 @@ public class TableSample extends Application {
             this.email = email;
         }
         
+        @SuppressWarnings({"unchecked","fallthrough"})
         public TableViewColumnSet[] read(){
             comboBoxName=new ComboBox();
             comboBoxName.setPromptText(name);
