@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?><module codename="org.netbeans.lib.profiler/1">
+    <module_version install_time="1324391101996" last="true" origin="installer" specification_version="1.14.1">
+        <file crc="2155818874" name="config/Modules/org-netbeans-lib-profiler.xml"/>
+        <file crc="1171588166" name="lib/deployed/jdk15/hpux-pa_risc2.0/libprofilerinterface.sl"/>
+        <file crc="1121724305" name="lib/deployed/jdk15/hpux-pa_risc2.0w/libprofilerinterface.sl"/>
+        <file crc="4046404205" name="lib/deployed/jdk15/linux-amd64/libprofilerinterface.so"/>
+        <file crc="1452937853" name="lib/deployed/jdk15/linux/libprofilerinterface.so"/>
+        <file crc="699977311" name="lib/deployed/jdk15/mac/libprofilerinterface.jnilib"/>
+        <file crc="2727188016" name="lib/deployed/jdk15/solaris-amd64/libprofilerinterface.so"/>
+        <file crc="3697300898" name="lib/deployed/jdk15/solaris-i386/libprofilerinterface.so"/>
+        <file crc="2335402833" name="lib/deployed/jdk15/solaris-sparc/libprofilerinterface.so"/>
+        <file crc="691897368" name="lib/deployed/jdk15/solaris-sparcv9/libprofilerinterface.so"/>
+        <file crc="3549242823" name="lib/deployed/jdk15/windows-amd64/profilerinterface.dll"/>
+        <file crc="569440000" name="lib/deployed/jdk15/windows-amd64/profilerinterface.map"/>
+        <file crc="1281092328" name="lib/deployed/jdk15/windows/profilerinterface.dll"/>
+        <file crc="366855530" name="lib/deployed/jdk15/windows/profilerinterface.map"/>
+        <file crc="813606401" name="lib/deployed/jdk16/hpux-pa_risc2.0/libprofilerinterface.sl"/>
+        <file crc="3075722377" name="lib/deployed/jdk16/hpux-pa_risc2.0w/libprofilerinterface.sl"/>
+        <file crc="811128255" name="lib/deployed/jdk16/linux-amd64/libprofilerinterface.so"/>
+        <file crc="1470318463" name="lib/deployed/jdk16/linux/libprofilerinterface.so"/>
+        <file crc="3267965566" name="lib/deployed/jdk16/mac/libprofilerinterface.jnilib"/>
+        <file crc="3357368250" name="lib/deployed/jdk16/solaris-amd64/libprofilerinterface.so"/>
+        <file crc="648140460" name="lib/deployed/jdk16/solaris-i386/libprofilerinterface.so"/>
+        <file crc="3400760714" name="lib/deployed/jdk16/solaris-sparc/libprofilerinterface.so"/>
+        <file crc="2534675827" name="lib/deployed/jdk16/solaris-sparcv9/libprofilerinterface.so"/>
+        <file crc="2536215305" name="lib/deployed/jdk16/windows-amd64/profilerinterface.dll"/>
+        <file crc="2259786305" name="lib/deployed/jdk16/windows-amd64/profilerinterface.map"/>
+        <file crc="3286698882" name="lib/deployed/jdk16/windows/profilerinterface.dll"/>
+        <file crc="660029257" name="lib/deployed/jdk16/windows/profilerinterface.map"/>
+        <file crc="1500458198" name="lib/jfluid-server-15.jar"/>
+        <file crc="698415486" name="lib/jfluid-server.jar"/>
+        <file crc="3063853560" name="modules/org-netbeans-lib-profiler.jar"/>
+    </module_version>
+</module>

@@ -1,0 +1,5 @@
+JAVA_VERSION="1.7.0"
+OS_NAME="Darwin"
+OS_VERSION="11.2"
+OS_ARCH="x86_64"
+SOURCE=" .:d738383dd287 corba:b8560e92b68c deploy:8a49859c2cf4 hotspot:93ec23d55b87 hotspot/src/closed:b4a04f309a4a hotspot/test/closed:e2f1d2ab957c install:5da4d549889b jaxp:a90108a5e161 jaxws:38baffe9be46 jdk:0573d282ca24 jdk/make/closed:9229d0b34a10 jdk/src/closed:8b05e08711a9 jdk/test/closed:0ce3b0e61928 langtools:a7e6a43c5e37 pubs:c8960acaacc1 sponsors:d0c10e50e7e8"

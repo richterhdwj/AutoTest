@@ -64,7 +64,6 @@ public class DataBaseBean extends DataBaseSet {
      * @throws Exception
      */
     public List selectObject(String sql) throws Exception {
-        //TODO:
         connect();
         List<Object> retList = new ArrayList<Object>();
         ResultSet rs = this.getStat().executeQuery(sql);

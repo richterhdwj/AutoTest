@@ -9,5 +9,13 @@ package main;
  * @author hdwjy
  */
 public class MainViewPlant {
+    TaksObject taksObject;
     
+    public MainViewPlant(TaksObject taksObject){
+        this.taksObject=taksObject;
+    }
+    
+    public void main(){
+        
+    }
 }

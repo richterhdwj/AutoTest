@@ -27,6 +27,8 @@ import javafx.scene.text.FontWeight;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 import javafx.util.Duration;
+import main.TaksObject;
+import tempTest.MenuSample;
 
 /**
  *
@@ -40,22 +42,27 @@ public class AutoTest extends Application {
     private Group root;
     private Stage primaryStage;
     private Rectangle rect;
+    
+    private TaksObject taksObject;
     Double nowLine = 0.0;
 
     /**
      * @param args the command line arguments
      */
+    @SuppressWarnings("ResultOfObjectAllocationIgnored")
     public static void main(String[] args) {
-        launch(args);
+                launch(args);
     }
 
     @Override
-    public void start(Stage primaryStage) {
+    public void start(Stage primaryStage) throws Exception {
+        new MenuSample(primaryStage);
         this.primaryStage = primaryStage;
         init(primaryStage);
         primaryStage.show();
     }
 
+    @SuppressWarnings("ResultOfObjectAllocationIgnored")
     public void init(Stage primaryStage) {
         root = new Group();
         primaryStage.setTitle("突击测验 AutoTest！");
@@ -92,9 +99,7 @@ public class AutoTest extends Application {
         VBox vbox = new VBox(2);
         vbox.setAlignment(Pos.CENTER);
         vbox.getChildren().addAll(label, stackPaneBar);
-
-
-
+        
         stackPane.getChildren().addAll(rectangle, vbox);
 
         rect = rectangle;
@@ -141,7 +146,7 @@ public class AutoTest extends Application {
                         public void run() {
                             while (true) {
                                 try {
-                                    sleep(500);
+                                    sleep(25);
                                 } catch (Exception e) {
                                 }
                                 if (nowLine >= 1) {
@@ -178,7 +183,11 @@ public class AutoTest extends Application {
                                 public void handle(ActionEvent arg0) {
                                     fadeTransition.stop();
                                     root.getChildren().clear();
-                                    System.out.println("接下来再玩别的");
+                                    
+                                    taksObject.setPrimaryStage(primaryStage);
+                                    taksObject.setRoot(root);
+                                    
+                                    
                                 }
                             });
                         }

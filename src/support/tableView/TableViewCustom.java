@@ -21,7 +21,7 @@ import javafx.stage.Stage;
  *
  * @author Richter
  */
-public class TableViewCustom extends TableView {
+public class TableViewCustom{
 
     public static String READ = "read";
     public static String WRITE = "write";
@@ -29,12 +29,13 @@ public class TableViewCustom extends TableView {
     private Stage node;                 //获取整体框架
     private Double width;               //获取整体宽度
     private boolean isRead = true;      //判断是否建立的为查看表还是编辑表
-    private TableViewColumnSet[] getTableViewSet; //通过结构得到表格建立说明
-    private Object getTableClass;       //结构预存值。
+    private TableViewColumnSet[] getTableViewSet;   //通过结构得到表格建立说明
+    private Object getTableClass;                   //结构预存值。
     private int nameNum = 0;                //表示表格内有多少个字符展示格
     private int doubleNum = 0;              //表示表格内有多少个数字展示格
     private int objNum = 0;                 //表示表格内有多少个其他类型展示格
-    private HashMap hashMap;              //存储临时空间中的字段对应关系
+    private HashMap tempMap;                //存储临时空间中的字段对应关系
+    private HashMap tempModelMap;           //用于存储临时空间与模型之间的字段对应关系
 
     /**
      * 当flag为read的时候，取tableObject的read()方法的数据， 而为write的时候，则取write()方法的数据
@@ -75,7 +76,8 @@ public class TableViewCustom extends TableView {
          * 获取每列数据的宽度
          */
         Double autoWidth = this.getTableViewColumnWidth();
-        hashMap = new HashMap();
+        tempMap = new HashMap();
+        tempModelMap = new HashMap();
         int maxCol = 0;
         //设置表头属性
         for (TableViewColumnSet tableViewSet : getTableViewSet) {
@@ -105,14 +107,17 @@ public class TableViewCustom extends TableView {
             if (isRead) {
                 if(tableViewSet.isIsRead()){
                     nowColName = getParametTypeNameRead(tableViewSet.getTypeName());
-                    hashMap.put(maxCol++, nowColName);
+                    tempMap.put(maxCol++, nowColName);
                 }
             } else {
                 if(tableViewSet.isIsWrite()){
                     nowColName = getParametTypeNameWrite(tableViewSet.getValueType(), tableViewSet.getValue());
-                    hashMap.put(maxCol++, nowColName);
+                    tempMap.put(maxCol++, nowColName);
                 }
             }
+            
+            //保存下模型名与临时名之间的关系，方便取值
+            tempModelMap.put(tableViewSet.getColName(),nowColName);
 
             newSomeObjectCol.setCellValueFactory(new PropertyValueFactory(nowColName));
             /**
@@ -234,9 +239,9 @@ public class TableViewCustom extends TableView {
                     //设定列表为阅读时的参数值
                     if (tableViewSet.isIsRead()) {
                         if (tableViewSet.getTypeName().equals("checkbox") || tableViewSet.getTypeName().equals("Node")) {
-                            tableViewcenter.setAnyObject((String) this.hashMap.get(col), tableViewSet.getValueType());
+                            tableViewcenter.setAnyObject((String) this.tempMap.get(col), tableViewSet.getValueType());
                         } else {
-                            tableViewcenter.setAnyObject((String) this.hashMap.get(col), tableViewSet.getValue().toString());
+                            tableViewcenter.setAnyObject((String) this.tempMap.get(col), tableViewSet.getValue().toString());
                         }
                         col++;
                     }
@@ -244,15 +249,15 @@ public class TableViewCustom extends TableView {
                     //设定列表为可写时的参数值
                     if (tableViewSet.isIsWrite()) {
                         if (tableViewSet.getValueType() == null) {
-                            tableViewcenter.setAnyObject((String) this.hashMap.get(col), tableViewSet.getValue().toString());
+                            tableViewcenter.setAnyObject((String) this.tempMap.get(col), tableViewSet.getValue().toString());
                         } else {
-                            tableViewcenter.setAnyObject((String) this.hashMap.get(col), tableViewSet.getValueType());
+                            tableViewcenter.setAnyObject((String) this.tempMap.get(col), tableViewSet.getValueType());
                         }
                         col++;
                     }
                 }
             }
-            tableViewcenter.setObj(tableValue);
+//            tableViewcenter.setObj(tableValue);
             
             data.add(tableViewcenter);
         }
@@ -262,14 +267,14 @@ public class TableViewCustom extends TableView {
     }
 
     /**
-     * *
+     *获取临时结构中的值
      */
-    private Object getNameValue(Object obj, String getName) {
+    public Object getCenterValue(Object obj, String getName) {
         Object ret = null;
         try {
-            ret = obj.getClass().getMethod("get" + getName.substring(0, 1).toUpperCase() + getName.substring(1), (Class<?>) null);
+            ret = obj.getClass().getMethod(getName+"Property",(Class<?>) null);
         } catch (Exception e) {
-            System.out.println(obj.getClass().getName() + "里面没有" + "get" + getName.substring(0, 1).toUpperCase() + getName.substring(1) + "方法");
+            System.out.println(obj.getClass().getName() + "里面没有" +getName+"Property"+ "方法");
         }
         return ret;
     }
@@ -883,5 +888,6 @@ public class TableViewCustom extends TableView {
                 this.getClass().getMethod("set" + parametName.substring(0, 1).toUpperCase() + parametName.substring(1), Object.class).invoke(this, parametValue);
             }
         }
+        
     }
 }
