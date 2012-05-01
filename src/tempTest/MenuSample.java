@@ -3,8 +3,6 @@ package tempTest;
  * Copyright (c) 2008, 2012 Oracle and/or its affiliates.
  * All rights reserved. Use is subject to license terms.
  */
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javafx.application.Application;
 import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
@@ -94,12 +92,11 @@ public class MenuSample extends Application {
             menuBar.getMenus().add(systemMenuBarMenu);
         }
 
-        vbox.getChildren().addAll(menuBar);
+        vbox.getChildren().addAll(menuBar,sysMenuLabel);
         if (os != null && os.startsWith("Mac")) {
             HBox hbox = HBoxBuilder.create().alignment(Pos.CENTER).build();
             sysMenuLabel.setStyle("-fx-font-size: 24");
-            hbox.getChildren().add(sysMenuLabel);
-            vbox.getChildren().add(hbox);
+//            hbox.getChildren().add(sysMenuLabel);
             sysMenuLabel.setVisible((menuBar.getHeight() == 0) ? true : false);
             menuBar.heightProperty().addListener(new ChangeListener<Number>() {
                 public void changed(ObservableValue<? extends Number> ov, Number t, Number t1) {

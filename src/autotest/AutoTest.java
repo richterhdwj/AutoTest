@@ -27,8 +27,10 @@ import javafx.scene.text.FontWeight;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 import javafx.util.Duration;
+import main.MainViewPlant;
 import main.TaksObject;
 import tempTest.MenuSample;
+import tempTest.TableSample;
 
 /**
  *
@@ -56,10 +58,11 @@ public class AutoTest extends Application {
 
     @Override
     public void start(Stage primaryStage) throws Exception {
-        new MenuSample(primaryStage);
-        this.primaryStage = primaryStage;
-        init(primaryStage);
-        primaryStage.show();
+        TableSample a=new TableSample();
+        a.start(primaryStage);
+//        this.primaryStage = primaryStage;
+//        init(primaryStage);
+//        primaryStage.show();
     }
 
     @SuppressWarnings("ResultOfObjectAllocationIgnored")
@@ -125,9 +128,9 @@ public class AutoTest extends Application {
                         public void run() {
                             while (getInObject) {
                                 System.out.println(nowLine);
-                                nowLine = nowLine + 0.01;
+                                nowLine = nowLine + 0.5;
                                 try {
-                                    sleep(100);
+                                    sleep(1);
                                 } catch (InterruptedException ex) {
                                     Logger.getLogger(AutoTest.class.getName()).log(Level.SEVERE, null, ex);
                                 }
@@ -187,7 +190,7 @@ public class AutoTest extends Application {
                                     taksObject.setPrimaryStage(primaryStage);
                                     taksObject.setRoot(root);
                                     
-                                    
+                                    new MainViewPlant(taksObject);
                                 }
                             });
                         }

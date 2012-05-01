@@ -1,127 +1,135 @@
 package tempTest;
 
 /**
- * Copyright (c) 2008, 2012 Oracle and/or its affiliates.
- * All rights reserved. Use is subject to license terms.
+ * Copyright (c) 2008, 2012 Oracle and/or its affiliates. All rights reserved.
+ * Use is subject to license terms.
  */
-import java.util.ArrayList;
-import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javafx.application.Application;
-import javafx.collections.FXCollections;
 import javafx.scene.Group;
 import javafx.scene.Scene;
-import javafx.scene.control.ComboBox;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableView;
-import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
-import support.ModelBase;
-import support.tableView.TableViewColumnSet;
-import support.tableView.TableViewCustom;
+import javafx.animation.Timeline;
+import javafx.animation.TranslateTransition;
+import javafx.animation.TranslateTransitionBuilder;
+import javafx.event.EventHandler;
+import javafx.scene.Node;
+import javafx.scene.control.Label;
+import javafx.scene.effect.BlendMode;
+import javafx.scene.layout.VBox;
+import javafx.scene.paint.Color;
+import javafx.scene.shape.Circle;
+import javafx.scene.shape.Rectangle;
+import javafx.util.Duration;
 
 /**
- * A simple table with a header row.
+ * A sample in which a node moves from one location to another over a given
+ * time.
  *
- * @see javafx.scene.control.TableCell
- * @see javafx.scene.control.TableColumn
- * @see javafx.scene.control.TablePosition
- * @see javafx.scene.control.TableRow
- * @see javafx.scene.control.TableView
+ * @related animation/transitions/FadeTransition @related
+ * animation/transitions/FillTransition @related
+ * animation/transitions/ParallelTransition @related
+ * animation/transitions/PathTransition @related
+ * animation/transitions/PauseTransition @related
+ * animation/transitions/RotateTransition @related
+ * animation/transitions/ScaleTransition @related
+ * animation/transitions/SequentialTransition @related
+ * animation/transitions/StrokeTransition
+ *
+ * @see javafx.animation.TranslateTransition
+ * @see javafx.animation.TranslateTransitionBuilder
+ * @see javafx.animation.Transition
  */
 public class TableSample extends Application {
-    private void init(Stage primaryStage) throws Exception {
+
+    private TranslateTransition translateTransition;
+    private TranslateTransition translateTransition2;
+
+    private void init(Stage primaryStage) {
         Group root = new Group();
-        primaryStage.setScene(new Scene(root,400,200));
-        List<Person> data = new ArrayList<Person>();
-            data.add(new Person("Jacob",     "Smith",    "jacob.smith@example.com"));
-            data.add(new Person("Isabella",  "Johnson",  "isabella.johnson@example.com"));
-            data.add(new Person("Ethan",     "Williams", "ethan.williams@example.com"));
-            data.add(new Person("Emma",      "Jones",    "emma.jones@example.com" ));
-            data.add(new Person("Michael",   "Brown",    "michael.brown@example.com"));
-        ModelBase.setCheckBoxs(data, null,true);
-        Person personSet=(Person)ModelBase.getListOne(data);
-        TableViewCustom tableView = new TableViewCustom(personSet,primaryStage,"read");
-        tableView.setTableViewColumn();
-        TableView getTableView=tableView.setTableViewData(data);
-        VBox vbox=new VBox(1);
-        vbox.setPrefSize(400,200);
-        vbox.getChildren().add(getTableView);
+        primaryStage.setScene(new Scene(root, 400, 400));
         
-        root.getChildren().add(vbox);
+        Label x = new Label("aapo998xsadsahduqwohduowquhwquohxquwohuwqobwqohqw");
+
+        Rectangle rect = new Rectangle(0, 0, 150, 150);
+        rect.setFill(null);
+        rect.setStroke(Color.WHITE);
+        rect.setStrokeWidth(40);
+
+        Label y = new Label("你好！");
+//        y.setLayoutX(300);
+//        y.setLayoutY(50);
+
+        Rectangle rect2 = new Rectangle(150, 0, 250, 150);
+        rect2.setFill(Color.WHITE);
+
+        root.getChildren().addAll(x, rect, rect2, y);
+        translateTransition = new TranslateTransition(Duration.seconds(4), x);
+        translateTransition.setFromX(-x.getText().length() * x.getFont().getSize());
+        translateTransition.setFromY(50);
+        translateTransition.setToX(primaryStage.getScene().getWidth() + 50);
+        translateTransition.setCycleCount(Timeline.INDEFINITE);
+        translateTransition.setAutoReverse(false);
+
+        translateTransition2 = new TranslateTransition(Duration.seconds(4), y);
+        translateTransition2.setFromX(-x.getText().length() * x.getFont().getSize());
+        translateTransition2.setFromY(50);
+        translateTransition2.setToX(primaryStage.getScene().getWidth() + 50);
+        translateTransition2.setCycleCount(Timeline.INDEFINITE);
+        translateTransition2.setAutoReverse(false);
+
+//        translateTransition = TranslateTransitionBuilder.create()
+//                .duration(Duration.seconds(10))
+//                .node(x)
+//                .fromX(-x.getText().length()*x.getFont().getSize())
+//                .toX(primaryStage.getScene().getWidth()+50)
+//                .cycleCount(Timeline.INDEFINITE)
+//                .autoReverse(false)
+//                .build();
     }
 
-    public static class Person extends ModelBase{
-        private String name;
-        private String code;
-        private String email;
-        
-        private ComboBox comboBoxName;
+    public void play() throws InterruptedException {
+        translateTransition.play();
+        Thread thread = new Thread(
+                                new Runnable() {
 
-        public ComboBox getComboBoxName() {
-            return comboBoxName;
-        }
-
-        public void setComboBoxName(ComboBox comboBoxName) {
-            this.comboBoxName = comboBoxName;
-        }
-        
-        public Person(){
-            
-        }
-        
-        public Person(String name, String code, String email) {
-            this.name = name;
-            this.code = code;
-            this.email = email;
-        }
-        
-        @SuppressWarnings({"unchecked","fallthrough"})
-        public TableViewColumnSet[] read(){
-            comboBoxName=new ComboBox();
-            comboBoxName.setPromptText(name);
-            comboBoxName.setEditable(true);
-            comboBoxName.setItems(FXCollections.observableArrayList(
-            "Option 1", "Option 2", "Option 3",
-            "Option 4", "Option 5", "Option 6",
-            "Longer ComboBox item",
-            "Option 7", "Option 8", "Option 9",
-            "Option 10", "Option 12"));
-            setTableViewColumn(new TableViewColumnSet[]{
-              new TableViewColumnSet("name","姓名",null,comboBoxName,name,true,true),
-              new TableViewColumnSet("code","编号",60.0,null,code,true,true),
-              new TableViewColumnSet("email","邮件地址",null,null,email,true,true),
-            });
-            return this.getTableViewColsSet();
-        }
-        
-        public String getCode() {
-            return code;
-        }
-
-        public void setCode(String code) {
-            this.code = code;
-        }
-
-        public String getEmail() {
-            return email;
-        }
-
-        public void setEmail(String email) {
-            this.email = email;
-        }
-
-        public String getName() {
-            return name;
-        }
-
-        public void setName(String name) {
-            this.name = name;
-        }
+                                    @Override
+                                    public void run() {
+                                try {
+                                    translateTransition2.play();
+                                    System.out.println("yes!");
+                                } catch (Exception ex) {
+                                    Logger.getLogger(TableSample.class.getName()).log(Level.SEVERE, null, ex);
+                                }
+                                
+                                    }
+                                });
+        thread.sleep(5000);
+        thread.start();
     }
 
-    @Override public void start(Stage primaryStage) throws Exception {
+    @Override
+    public void stop() {
+        translateTransition.stop();
+    }
+
+    public double getSampleWidth() {
+        return 400;
+    }
+
+    public double getSampleHeight() {
+        return 40;
+    }
+
+    @Override
+    public void start(Stage primaryStage) throws Exception {
         init(primaryStage);
         primaryStage.show();
+        play();
     }
-    public static void main(String[] args) { launch(args); }
+
+    public static void main(String[] args) {
+        launch(args);
+    }
 }
