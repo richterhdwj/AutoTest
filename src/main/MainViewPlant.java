@@ -47,7 +47,7 @@ public class MainViewPlant {
         
         //top层设定为标题＋menu菜单的内容
         
-        //标题分为固定标题和滚动标题
+        //标题分为固定标题
         final Label textLabel=new Label();
         textLabel.setFont(getTexlabelFont());
         textLabel.setText("自动测验机");
@@ -63,6 +63,10 @@ public class MainViewPlant {
         borderPane.setTop(topbox);
     }
     
+    /**
+     * 暂时放弃在首页实现（因为没必要）
+     * @return 
+     */
     private StackPane getRollingLabel(){
         StackPane rollingLabel=new StackPane();
         
