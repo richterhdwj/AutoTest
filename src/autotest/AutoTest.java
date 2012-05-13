@@ -30,8 +30,6 @@ import javafx.util.Duration;
 import main.MainViewPlant;
 import main.TaksObject;
 import tempTest.MenuSample;
-import tempTest.TableSample;
-
 /**
  *
  * @author hdwjy
@@ -58,16 +56,19 @@ public class AutoTest extends Application {
 
     @Override
     public void start(Stage primaryStage) throws Exception {
-        TableSample a=new TableSample();
-        a.start(primaryStage);
-//        this.primaryStage = primaryStage;
-//        init(primaryStage);
-//        primaryStage.show();
+//        MenuSample a=new MenuSample(primaryStage);
+//        a.start(primaryStage);
+        taksObject=new TaksObject();
+        this.primaryStage = primaryStage;
+        init(primaryStage);
+        primaryStage.show();
     }
 
     @SuppressWarnings("ResultOfObjectAllocationIgnored")
     public void init(Stage primaryStage) {
         root = new Group();
+        primaryStage.setResizable(false);
+        primaryStage.centerOnScreen();
         primaryStage.setTitle("突击测验 AutoTest！");
         primaryStage.setOnCloseRequest(new EventHandler<WindowEvent>() {
 
@@ -185,10 +186,11 @@ public class AutoTest extends Application {
                                 @Override
                                 public void handle(ActionEvent arg0) {
                                     fadeTransition.stop();
-                                    root.getChildren().clear();
-                                    
                                     taksObject.setPrimaryStage(primaryStage);
                                     taksObject.setRoot(root);
+                                    
+                                    root.getChildren().clear();
+                                    
                                     
                                     new MainViewPlant(taksObject);
                                 }

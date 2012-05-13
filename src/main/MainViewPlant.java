@@ -7,9 +7,9 @@ package main;
 import javafx.animation.Timeline;
 import javafx.animation.TranslateTransition;
 import javafx.scene.Group;
-import javafx.scene.control.Label;
-import javafx.scene.control.MenuBar;
+import javafx.scene.control.*;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
@@ -45,22 +45,33 @@ public class MainViewPlant {
         //设定主界面底层
         BorderPane borderPane = new BorderPane();
         
-        //top层设定为标题＋menu菜单的内容
-        
-        //标题分为固定标题
-        final Label textLabel=new Label();
-        textLabel.setFont(getTexlabelFont());
-        textLabel.setText("自动测验机");
+        //top层设定为menu菜单的内容
         
         //设定Menu标题栏
         final MenuBar menubar=new MenuBar();
         
+        final MenuItem menuAdd=MenuItemBuilder.create().text("新增条目").build();
+        final MenuItem menuTest=MenuItemBuilder.create().text("开始测验").build();
+        final MenuItem menuSetup=MenuItemBuilder.create().text("基础设定").build();
+        
+        // Options menu
+        Menu menu = MenuBuilder.create().text("开始").items(menuAdd,menuTest,menuSetup).build();
+
+        menubar.getMenus().addAll(menu);
+        
         //然后标题和菜单用VBox统一起来
         VBox topbox=new VBox();
-        topbox.getChildren().addAll(textLabel,menubar);
+        topbox.getChildren().addAll(menubar);
         
         //top层设定为标题＋menu菜单的内容
         borderPane.setTop(topbox);
+        
+        //center层为图表
+        
+        borderPane.setCenter(taksObject.ChartPane());
+        
+        
+        root.getChildren().add(borderPane);
     }
     
     /**
