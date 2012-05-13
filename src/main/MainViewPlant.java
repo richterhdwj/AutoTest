@@ -4,8 +4,12 @@
  */
 package main;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javafx.animation.Timeline;
 import javafx.animation.TranslateTransition;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.scene.Group;
 import javafx.scene.control.*;
 import javafx.scene.layout.BorderPane;
@@ -43,7 +47,9 @@ public class MainViewPlant {
     public void main(){
         Group root=taksObject.getRoot();
         //设定主界面底层
-        BorderPane borderPane = new BorderPane();
+        final BorderPane borderPane = new BorderPane();
+        //塞入整体结构参与全局控制
+        taksObject.setBorderPane(borderPane);
         
         //top层设定为menu菜单的内容
         
@@ -51,6 +57,18 @@ public class MainViewPlant {
         final MenuBar menubar=new MenuBar();
         
         final MenuItem menuAdd=MenuItemBuilder.create().text("新增条目").build();
+        menuAdd.setOnAction(new EventHandler<ActionEvent>(){
+            @Override
+            public void handle(ActionEvent t) {
+                taksObject.setFirstPage(borderPane.getCenter());
+                try {
+                    new WordInputCenter(taksObject).WordView();
+                } catch (Exception ex) {
+                    Logger.getLogger(MainViewPlant.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+        });
+        
         final MenuItem menuTest=MenuItemBuilder.create().text("开始测验").build();
         final MenuItem menuSetup=MenuItemBuilder.create().text("基础设定").build();
         

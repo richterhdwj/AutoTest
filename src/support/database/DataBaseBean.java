@@ -38,7 +38,7 @@ public class DataBaseBean extends DataBaseSet {
         Object obj = ct.newInstance();
 
         String tableName = getTableName(obj);
-        ResultSet rs = this.getStat().executeQuery("select t.* from " + tableName + " t" + sql);
+        ResultSet rs = this.getStat().executeQuery("select t.* from " + tableName + " as t " + (sql==null?"":sql));
         List list = new ArrayList();
         while (rs.next()) {
             Object newTableModel = getAnyTableModel(obj);

@@ -26,8 +26,6 @@ public class TableViewCustom{
     public static String READ = "read";
     public static String WRITE = "write";
     private TableView tableViewCustom;  //返回用的值
-    private Stage node;                 //获取整体框架
-    private Double width;               //获取整体宽度
     private boolean isRead = true;      //判断是否建立的为查看表还是编辑表
     private TableViewColumnSet[] getTableViewSet;   //通过结构得到表格建立说明
     private Object getTableClass;                   //结构预存值。
@@ -44,11 +42,9 @@ public class TableViewCustom{
      * @param node
      * @param flag
      */
-    public TableViewCustom(Object tableObject, Stage node, String flag) throws Exception {
+    public TableViewCustom(Object tableObject,String flag) throws Exception {
         getTableClass = tableObject;
         tableViewCustom = new TableView();
-        this.node = node;
-        width = node.getScene().getWidth();
         Class paramets[] = new Class[0];
         Object obj[] = new Object[0];
         if (flag.equals(READ)) {
@@ -75,7 +71,6 @@ public class TableViewCustom{
         /**
          * 获取每列数据的宽度
          */
-        Double autoWidth = this.getTableViewColumnWidth();
         tempMap = new HashMap();
         tempModelMap = new HashMap();
         int maxCol = 0;
@@ -93,12 +88,11 @@ public class TableViewCustom{
             if (tableViewSet.getTypeName().equals("checkBox")) {
                 newSomeObjectCol.setMaxWidth(20);
                 newSomeObjectCol.setMinWidth(20);
+                newSomeObjectCol.setResizable(true);
             } else {
                 if (tableViewSet.getColWidth() != null){
                     if (tableViewSet.getColWidth() > 0) {
                         newSomeObjectCol.setPrefWidth(tableViewSet.getColWidth());
-                    } else if(tableViewSet.getColWidth()<0){
-                        newSomeObjectCol.setPrefWidth(autoWidth);
                     }
                 }
             }
@@ -132,7 +126,7 @@ public class TableViewCustom{
         if (parametType == null) {
             ret = TableViewCenterNames.stringName[nameNum];
             nameNum++;
-        } else if (parametType.equals("Note")) {
+        } else if (parametType.equals("Node")) {
             ret = TableViewCenterNames.objectName[objNum];
             objNum++;
         } else if (parametType.equals("checkbox")) {
@@ -170,41 +164,40 @@ public class TableViewCustom{
         return ret;
     }
 
-    /**
-     * 获取默认列宽，如果每列剩余宽度不足80的话，则设为80
-     *
-     * @return
-     */
-    private Double getTableViewColumnWidth() {
-        Double widthThis = width;
-        int col = 0;
-        for (TableViewColumnSet tableViewSet : getTableViewSet) {
-            if(isRead){
-                if(tableViewSet.isIsRead())
-                    if (tableViewSet.getTypeName().equals("checkBox")) {
-                        widthThis = widthThis - 20;
-                    } else if (tableViewSet.getColWidth() != null && tableViewSet.getColWidth() > 0) {
-                        widthThis = widthThis - tableViewSet.getColWidth();
-                    } else {
-                        col++;
-                    }
-            }else{
-                if(tableViewSet.isIsWrite())
-                    if (tableViewSet.getTypeName().equals("checkBox")) {
-                        widthThis = widthThis - 20;
-                    } else if (tableViewSet.getColWidth() != null && tableViewSet.getColWidth() > 0) {
-                        widthThis = widthThis - tableViewSet.getColWidth();
-                    } else {
-                        col++;
-                    }
-            }
-        }
-        widthThis = widthThis / col;
-        if (widthThis < 80) {
-            widthThis = 80.0;
-        }
-        return widthThis;
-    }
+//    /**
+//     * 获取默认列宽，如果每列剩余宽度不足80的话，则设为80
+//     *
+//     * @return
+//     */
+//    private Double getTableViewColumnWidth() {
+//        int col = 0;
+//        for (TableViewColumnSet tableViewSet : getTableViewSet) {
+//            if(isRead){
+//                if(tableViewSet.isIsRead())
+//                    if (tableViewSet.getTypeName().equals("checkBox")) {
+//                        widthThis = widthThis - 20;
+//                    } else if (tableViewSet.getColWidth() != null && tableViewSet.getColWidth() > 0) {
+//                        widthThis = widthThis - tableViewSet.getColWidth();
+//                    } else {
+//                        col++;
+//                    }
+//            }else{
+//                if(tableViewSet.isIsWrite())
+//                    if (tableViewSet.getTypeName().equals("checkBox")) {
+//                        widthThis = widthThis - 20;
+//                    } else if (tableViewSet.getColWidth() != null && tableViewSet.getColWidth() > 0) {
+//                        widthThis = widthThis - tableViewSet.getColWidth();
+//                    } else {
+//                        col++;
+//                    }
+//            }
+//        }
+//        widthThis = widthThis / col;
+//        if (widthThis < 80) {
+//            widthThis = 80.0;
+//        }
+//        return widthThis;
+//    }
 
     /**
      * 然后塞入所需要的数据
@@ -241,7 +234,11 @@ public class TableViewCustom{
                         if (tableViewSet.getTypeName().equals("checkbox") || tableViewSet.getTypeName().equals("Node")) {
                             tableViewcenter.setAnyObject((String) this.tempMap.get(col), tableViewSet.getValueType());
                         } else {
-                            tableViewcenter.setAnyObject((String) this.tempMap.get(col), tableViewSet.getValue().toString());
+                            try{
+                                tableViewcenter.setAnyObject((String) this.tempMap.get(col), tableViewSet.getValue().toString());
+                            }catch(Exception e){
+                                
+                            }
                         }
                         col++;
                     }

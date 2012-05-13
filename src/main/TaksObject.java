@@ -12,6 +12,7 @@ import javafx.scene.chart.BarChart;
 import javafx.scene.chart.CategoryAxis;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
+import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
 
 /**
@@ -21,7 +22,8 @@ import javafx.stage.Stage;
 public class TaksObject {
     private Group root;
     private Stage primaryStage;
-    private Node firstPage;
+    private BorderPane borderPane;                                              //主界面底层
+    private Node firstPage;                                                     //页面临时缓存。
     private Node tempPage;
 
     public Stage getPrimaryStage() {
@@ -55,7 +57,20 @@ public class TaksObject {
     public void setTempPage(Node tempPage) {
         this.tempPage = tempPage;
     }
+
+    public BorderPane getBorderPane() {
+        return borderPane;
+    }
+
+    public void setBorderPane(BorderPane borderPane) {
+        this.borderPane = borderPane;
+    }
     
+    /**
+     * 首页的展示
+     * @return 
+     */
+    @SuppressWarnings({"unchecked","fallthrough"})
     public Node ChartPane(){
         
         String[] years = {"2007", "2008", "2009"};

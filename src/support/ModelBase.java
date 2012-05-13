@@ -108,7 +108,7 @@ public class ModelBase {
             for (i = 0; i < addAnyItemsTemp.length; i++) {
                 addAnyItems[i] = addAnyItemsTemp[i];
             }
-            addAnyItems[i + 1] = item;
+            addAnyItems[i] = item;
         }
         retTableViewColumnSetsbulid();
     }
