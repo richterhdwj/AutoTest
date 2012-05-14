@@ -6,6 +6,7 @@ package main.databaseTable;
 
 import javafx.collections.FXCollections;
 import javafx.scene.control.ComboBox;
+import main.databaseModel.WordRecord;
 import support.ModelBase;
 import support.tableView.TableViewColumnSet;
 
@@ -19,6 +20,7 @@ public class WordViewTable extends ModelBase {
     private String contect;
     private String trans;
     private String example;
+    private WordRecord wordRecord;
 
     @SuppressWarnings({"unchecked", "fallthrough"})
     public TableViewColumnSet[] read() {
@@ -60,5 +62,13 @@ public class WordViewTable extends ModelBase {
 
     public void setType(String type) {
         this.type = type;
+    }
+
+    public WordRecord getWordRecord() {
+        return wordRecord;
+    }
+
+    public void setWordRecord(WordRecord wordRecord) {
+        this.wordRecord = wordRecord;
     }
 }

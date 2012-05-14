@@ -254,7 +254,7 @@ public class TableViewCustom{
                     }
                 }
             }
-//            tableViewcenter.setObj(tableValue);
+            tableViewcenter.setObj(tableValue);
             
             data.add(tableViewcenter);
         }
@@ -874,6 +874,246 @@ public class TableViewCustom{
 
         public void setObj(Object obj) {
             this.obj = obj;
+        }
+
+        public DoubleProperty getDouble1() {
+            return double1;
+        }
+
+        public DoubleProperty getDouble10() {
+            return double10;
+        }
+
+        public DoubleProperty getDouble11() {
+            return double11;
+        }
+
+        public DoubleProperty getDouble12() {
+            return double12;
+        }
+
+        public DoubleProperty getDouble13() {
+            return double13;
+        }
+
+        public DoubleProperty getDouble14() {
+            return double14;
+        }
+
+        public DoubleProperty getDouble15() {
+            return double15;
+        }
+
+        public DoubleProperty getDouble16() {
+            return double16;
+        }
+
+        public DoubleProperty getDouble17() {
+            return double17;
+        }
+
+        public DoubleProperty getDouble18() {
+            return double18;
+        }
+
+        public DoubleProperty getDouble19() {
+            return double19;
+        }
+
+        public DoubleProperty getDouble2() {
+            return double2;
+        }
+
+        public DoubleProperty getDouble20() {
+            return double20;
+        }
+
+        public DoubleProperty getDouble3() {
+            return double3;
+        }
+
+        public DoubleProperty getDouble4() {
+            return double4;
+        }
+
+        public DoubleProperty getDouble5() {
+            return double5;
+        }
+
+        public DoubleProperty getDouble6() {
+            return double6;
+        }
+
+        public DoubleProperty getDouble7() {
+            return double7;
+        }
+
+        public DoubleProperty getDouble8() {
+            return double8;
+        }
+
+        public DoubleProperty getDouble9() {
+            return double9;
+        }
+
+        public StringProperty getName1() {
+            return name1;
+        }
+
+        public StringProperty getName10() {
+            return name10;
+        }
+
+        public StringProperty getName11() {
+            return name11;
+        }
+
+        public StringProperty getName12() {
+            return name12;
+        }
+
+        public StringProperty getName13() {
+            return name13;
+        }
+
+        public StringProperty getName14() {
+            return name14;
+        }
+
+        public StringProperty getName15() {
+            return name15;
+        }
+
+        public StringProperty getName16() {
+            return name16;
+        }
+
+        public StringProperty getName17() {
+            return name17;
+        }
+
+        public StringProperty getName18() {
+            return name18;
+        }
+
+        public StringProperty getName19() {
+            return name19;
+        }
+
+        public StringProperty getName2() {
+            return name2;
+        }
+
+        public StringProperty getName20() {
+            return name20;
+        }
+
+        public StringProperty getName3() {
+            return name3;
+        }
+
+        public StringProperty getName4() {
+            return name4;
+        }
+
+        public StringProperty getName5() {
+            return name5;
+        }
+
+        public StringProperty getName6() {
+            return name6;
+        }
+
+        public StringProperty getName7() {
+            return name7;
+        }
+
+        public StringProperty getName8() {
+            return name8;
+        }
+
+        public StringProperty getName9() {
+            return name9;
+        }
+
+        public ObjectProperty getObj1() {
+            return obj1;
+        }
+
+        public ObjectProperty getObj10() {
+            return obj10;
+        }
+
+        public ObjectProperty getObj11() {
+            return obj11;
+        }
+
+        public ObjectProperty getObj12() {
+            return obj12;
+        }
+
+        public ObjectProperty getObj13() {
+            return obj13;
+        }
+
+        public ObjectProperty getObj14() {
+            return obj14;
+        }
+
+        public ObjectProperty getObj15() {
+            return obj15;
+        }
+
+        public ObjectProperty getObj16() {
+            return obj16;
+        }
+
+        public ObjectProperty getObj17() {
+            return obj17;
+        }
+
+        public ObjectProperty getObj18() {
+            return obj18;
+        }
+
+        public ObjectProperty getObj19() {
+            return obj19;
+        }
+
+        public ObjectProperty getObj2() {
+            return obj2;
+        }
+
+        public ObjectProperty getObj20() {
+            return obj20;
+        }
+
+        public ObjectProperty getObj3() {
+            return obj3;
+        }
+
+        public ObjectProperty getObj4() {
+            return obj4;
+        }
+
+        public ObjectProperty getObj5() {
+            return obj5;
+        }
+
+        public ObjectProperty getObj6() {
+            return obj6;
+        }
+
+        public ObjectProperty getObj7() {
+            return obj7;
+        }
+
+        public ObjectProperty getObj8() {
+            return obj8;
+        }
+
+        public ObjectProperty getObj9() {
+            return obj9;
         }
 
         public void setAnyObject(String parametName, Object parametValue) throws Exception {

@@ -55,6 +55,7 @@ public class MainViewPlant {
         
         //设定Menu标题栏
         final MenuBar menubar=new MenuBar();
+        menubar.setPrefWidth(1024);
         
         final MenuItem menuAdd=MenuItemBuilder.create().text("新增条目").build();
         menuAdd.setOnAction(new EventHandler<ActionEvent>(){

@@ -363,11 +363,23 @@ public class DataBaseBean extends DataBaseSet {
                     int i = 0;
                     for (Class classType : method.getParameterTypes()) {
                         if (classType.isInstance(new String())) {
-                            paramets[i] = nameValue[i].toString();
+                            try{
+                                paramets[i] = nameValue[i].toString();
+                            }catch(Exception e){
+                                paramets[i] = null;
+                            }
                         } else if (classType.isInstance(Integer.TYPE)) {
-                            paramets[i] = Integer.parseInt(nameValue[i].toString());
+                            try{
+                                paramets[i] = Integer.parseInt(nameValue[i].toString());
+                            }catch(Exception e){
+                                paramets[i] = null;
+                            }
                         } else if (classType.isInstance(Double.TYPE)) {
-                            paramets[i] = Double.parseDouble(nameValue[i].toString());
+                            try{
+                                paramets[i] = Double.parseDouble(nameValue[i].toString());
+                            }catch(Exception e){
+                                paramets[i] = null;
+                            }
                         }
                     }
                     noMethod = false;

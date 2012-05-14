@@ -4,6 +4,7 @@
  */
 package main;
 
+import java.util.HashMap;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.Group;
@@ -14,6 +15,7 @@ import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
+import support.database.DataBaseManager;
 
 /**
  *
@@ -25,6 +27,9 @@ public class TaksObject {
     private BorderPane borderPane;                                              //主界面底层
     private Node firstPage;                                                     //页面临时缓存。
     private Node tempPage;
+    public HashMap rootMap=new HashMap();
+    
+    private DataBaseManager database=new DataBaseManager();
 
     public Stage getPrimaryStage() {
         return primaryStage;
@@ -102,5 +107,9 @@ public class TaksObject {
         chart.setTitle("综合成绩单");
         
         return chart;
+    }
+    
+    public void save(Object obj) throws Exception{
+        database.save(obj);
     }
 }
