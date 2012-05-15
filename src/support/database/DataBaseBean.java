@@ -63,15 +63,15 @@ public class DataBaseBean extends DataBaseSet {
      * @return
      * @throws Exception
      */
-    public List selectObject(String sql) throws Exception {
+    public List<Object[]> selectObject(String sql) throws Exception {
         connect();
-        List<Object> retList = new ArrayList<Object>();
+        List<Object[]> retList = new ArrayList<>();
         ResultSet rs = this.getStat().executeQuery(sql);
         int colmax = rs.getMetaData().getColumnCount();
         while (rs.next()) {
             Object[] obj = new Object[colmax];
             for (int col = 1; col <= colmax; col++) {
-                obj[col] = rs.getObject(col);
+                obj[col-1] = rs.getObject(col);
             }
             retList.add(obj);
         }

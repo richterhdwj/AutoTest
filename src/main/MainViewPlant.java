@@ -61,11 +61,12 @@ public class MainViewPlant {
         menuAdd.setOnAction(new EventHandler<ActionEvent>(){
             @Override
             public void handle(ActionEvent t) {
-                taksObject.setFirstPage(borderPane.getCenter());
-                try {
-                    new WordInputCenter(taksObject).WordView();
-                } catch (Exception ex) {
-                    Logger.getLogger(MainViewPlant.class.getName()).log(Level.SEVERE, null, ex);
+                if(!taksObject.getRoot().getChildren().get(0).getClass().isInstance(new WordInputCenter(taksObject))){
+                    try {
+                        new WordInputCenter(taksObject).WordView();
+                    } catch (Exception ex) {
+                        Logger.getLogger(MainViewPlant.class.getName()).log(Level.SEVERE, null, ex);
+                    }
                 }
             }
         });

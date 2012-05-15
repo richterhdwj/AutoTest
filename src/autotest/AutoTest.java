@@ -25,11 +25,14 @@ import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.stage.Stage;
+import javafx.stage.StageStyle;
 import javafx.stage.WindowEvent;
 import javafx.util.Duration;
 import main.MainViewPlant;
 import main.TaksObject;
 import tempTest.MenuSample;
+import tempTest.StageSample;
+
 /**
  *
  * @author hdwjy
@@ -42,7 +45,6 @@ public class AutoTest extends Application {
     private Group root;
     private Stage primaryStage;
     private Rectangle rect;
-    
     private TaksObject taksObject;
     Double nowLine = 0.0;
 
@@ -51,23 +53,26 @@ public class AutoTest extends Application {
      */
     @SuppressWarnings("ResultOfObjectAllocationIgnored")
     public static void main(String[] args) {
-                launch(args);
+        launch(args);
     }
 
     @Override
     public void start(Stage primaryStage) throws Exception {
-//        MenuSample a=new MenuSample(primaryStage);
-//        a.start(primaryStage);
-        taksObject=new TaksObject();
-        this.primaryStage = primaryStage;
-        init(primaryStage);
-        primaryStage.show();
+        StageSample a=new StageSample();
+        a.start(primaryStage);
+//        taksObject = new TaksObject();
+//        this.primaryStage = primaryStage;
+//        init(primaryStage);
+//        primaryStage.show();
+//        System.out.println(primaryStage.isFocused());
+//        if (primaryStage.isFocused()) {
+//            primaryStage.show();
+//        }
     }
 
     @SuppressWarnings("ResultOfObjectAllocationIgnored")
-    public void init(Stage primaryStage) {
+    public void init(final Stage primaryStage) {
         root = new Group();
-        primaryStage.setResizable(false);
         primaryStage.centerOnScreen();
         primaryStage.setTitle("突击测验 AutoTest！");
         primaryStage.setOnCloseRequest(new EventHandler<WindowEvent>() {
@@ -103,7 +108,7 @@ public class AutoTest extends Application {
         VBox vbox = new VBox(2);
         vbox.setAlignment(Pos.CENTER);
         vbox.getChildren().addAll(label, stackPaneBar);
-        
+
         stackPane.getChildren().addAll(rectangle, vbox);
 
         rect = rectangle;
@@ -188,16 +193,33 @@ public class AutoTest extends Application {
                                     fadeTransition.stop();
                                     taksObject.setPrimaryStage(primaryStage);
                                     taksObject.setRoot(root);
-                                    
+
                                     root.getChildren().clear();
-                                    
-                                    
+
+
                                     new MainViewPlant(taksObject);
                                 }
                             });
                         }
                     });
             threadUpDate.start();
+
+            Thread everTopShow = new Thread(
+                    new Runnable() {
+
+                        @Override
+                        public void run() {
+                            while(true){
+                                try {
+                                    sleep(1000);
+                                } catch (InterruptedException ex) {
+                                    Logger.getLogger(AutoTest.class.getName()).log(Level.SEVERE, null, ex);
+                                }
+                                System.out.println(primaryStage.isFocused());
+                            }
+                        }
+                    });
+            everTopShow.start();
         }
     }
 }

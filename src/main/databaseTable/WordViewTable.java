@@ -28,7 +28,7 @@ public class WordViewTable extends ModelBase {
                     new TableViewColumnSet("type", "类型", 70d, null, type),
                     new TableViewColumnSet("contect", "词条", 450d, null, contect),
                     new TableViewColumnSet("trans", "解释", 150d, null, trans),
-                    new TableViewColumnSet("example", "例句", 174d, null, example),});
+                    new TableViewColumnSet("example", "例句", 174d, null, example)});
         return this.getTableViewColsSet();
     }
 

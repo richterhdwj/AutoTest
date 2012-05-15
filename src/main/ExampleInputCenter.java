@@ -34,7 +34,7 @@ import support.tableView.TableViewCustom.TableViewCenter;
  *
  * @author hdwjy
  */
-public class WordInputCenter {
+public class ExampleInputCenter {
 
     private TaksObject taksObject;
     private DataBaseManager dataBaseManager = new DataBaseManager();
@@ -44,12 +44,13 @@ public class WordInputCenter {
     private InnerGroupView innerGroupView;
     public static String rootName = "wordNew";
 
-    public WordInputCenter(TaksObject taksObject) {
+    public ExampleInputCenter(TaksObject taksObject) {
         this.taksObject = taksObject;
     }
 
     @SuppressWarnings({"unchecked", "fallthrough"})
     public void WordView() throws Exception {
+        taksObject.setFirstPage(taksObject.getBorderPane().getCenter());
         //清空原来所有的图表页面
         taksObject.getBorderPane().setCenter(null);
 

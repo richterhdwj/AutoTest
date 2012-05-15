@@ -143,6 +143,10 @@ public class InnerGroupView {
         }
     }
     
+    /**
+     * 确认小平台的默认摸消方法
+     * @param root 
+     */
     public void rewakeConfirm(Group root){
         this.rewake(root, "confirm");
     }
