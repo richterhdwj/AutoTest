@@ -27,6 +27,7 @@ public class TaksObject {
     private BorderPane borderPane;                                              //主界面底层
     private Node firstPage;                                                     //页面临时缓存。
     private Node tempPage;
+    private boolean hasAnswer=false;
     public HashMap rootMap=new HashMap();
     
     private DataBaseManager database=new DataBaseManager();
@@ -69,6 +70,14 @@ public class TaksObject {
 
     public void setBorderPane(BorderPane borderPane) {
         this.borderPane = borderPane;
+    }
+
+    public boolean isHasAnswer() {
+        return hasAnswer;
+    }
+
+    public void setHasAnswer(boolean hasAnswer) {
+        this.hasAnswer = hasAnswer;
     }
     
     /**

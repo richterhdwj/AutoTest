@@ -21,6 +21,7 @@ import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.util.Duration;
+import main.innerView.InnerGroupView;
 
 /**
  *
@@ -72,6 +73,13 @@ public class MainViewPlant {
         });
         
         final MenuItem menuTest=MenuItemBuilder.create().text("开始测验").build();
+        menuTest.setOnAction(new EventHandler<ActionEvent>(){
+            @Override
+            public void handle(ActionEvent t) {
+                if(!taksObject.isHasAnswer())
+                    new InnerGroupView(taksObject).newOutView();
+            }
+        });
         final MenuItem menuSetup=MenuItemBuilder.create().text("基础设定").build();
         
         // Options menu
