@@ -23,6 +23,9 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
 import main.databaseModel.WordRecord;
+import main.databaseModel.WordTopic;
+import main.databaseModel.WordTopicAnswer;
+import main.databaseTable.ExampleViewTable;
 import main.databaseTable.WordViewTable;
 import main.innerView.InnerGroupView;
 import support.DateBean;
@@ -40,17 +43,19 @@ public class ExampleInputCenter {
     private DataBaseManager dataBaseManager = new DataBaseManager();
     private TableViewCustom tableviewSeting;
     private TableView tableview;
-    private WordRecord editWordRecord;
+    private WordTopic editWordTopic;
+    private WordRecord wordRecord;
+    private ScrollPane scrollpane;
     private InnerGroupView innerGroupView;
     public static String rootName = "wordNew";
 
-    public ExampleInputCenter(TaksObject taksObject) {
+    public ExampleInputCenter(TaksObject taksObject, WordRecord wordRecord) {
         this.taksObject = taksObject;
+        this.wordRecord = wordRecord;
     }
 
     @SuppressWarnings({"unchecked", "fallthrough"})
-    public void WordView() throws Exception {
-        taksObject.setFirstPage(taksObject.getBorderPane().getCenter());
+    public void ExampleView() throws Exception {
         //清空原来所有的图表页面
         taksObject.getBorderPane().setCenter(null);
 
@@ -70,7 +75,7 @@ public class ExampleInputCenter {
             @Override
             public void handle(ActionEvent t) {
                 innerGroupView = new InnerGroupView(taksObject);
-                
+
                 innerGroupView.newInnerView(null, null, rootName);
                 try {
                     innerGroupView.newRoot.getChildren().add(newSavePlant(null));
@@ -87,7 +92,7 @@ public class ExampleInputCenter {
             public void handle(ActionEvent arg0) {
                 //追加一个确认的内容
                 innerGroupView = new InnerGroupView(taksObject);
-                Group group=innerGroupView.confirm("确实需要删除吗？");
+                Group group = innerGroupView.confirm("确实需要删除吗？");
 
                 innerGroupView.accButton.setOnAction(new EventHandler<ActionEvent>() {
 
@@ -99,11 +104,11 @@ public class ExampleInputCenter {
                             TableViewCenter tableViewCenter = nowItems.next();
                             CheckBox checkBox = (CheckBox) tableViewCenter.getObj1().getValue();
                             if (checkBox.isSelected()) {
-                                WordViewTable wordView = (WordViewTable) tableViewCenter.getObj();
-                                WordRecord wordRecord = wordView.getWordRecord();
-                                wordRecord.setSysFlag("0");
+                                ExampleViewTable exampleView = (ExampleViewTable) tableViewCenter.getObj();
+                                WordTopic wordTopic = exampleView.getWordTopic();
+                                wordTopic.setSysFlag("0");
                                 try {
-                                    taksObject.save(wordRecord);
+                                    taksObject.save(wordTopic);
                                 } catch (Exception ex) {
                                     Logger.getLogger(WordInputCenter.class.getName()).log(Level.SEVERE, null, ex);
                                 }
@@ -115,39 +120,54 @@ public class ExampleInputCenter {
                             e.printStackTrace();
                         }
                         innerGroupView.rewakeConfirm(null);
-                        innerGroupView=null;
+                        innerGroupView = null;
                     }
                 });
-                
-                innerGroupView.canButton.setOnAction(new EventHandler<ActionEvent>(){
+
+                innerGroupView.canButton.setOnAction(new EventHandler<ActionEvent>() {
+
                     @Override
                     public void handle(ActionEvent arg0) {
                         innerGroupView.rewakeConfirm(null);
-                        innerGroupView=null;
+                        innerGroupView = null;
                     }
                 });
             }
         });
 
-        buttonBox.getChildren().addAll(newButton, delButton);
+        Button backButton = new Button("返回");
+
+        backButton.setOnAction(new EventHandler<ActionEvent>() {
+
+            @Override
+            public void handle(ActionEvent arg0) {
+                try {
+                    new WordInputCenter(taksObject).WordView();
+                } catch (Exception ex) {
+                    Logger.getLogger(MainViewPlant.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+        });
+
+        buttonBox.getChildren().addAll(newButton, delButton, backButton);
 
         //然后设定列表区
 
         //以下是空结构时采用的空框架画图用
-        WordViewTable newWordViewTable = new WordViewTable();
+        ExampleViewTable newExampleViewTable = new ExampleViewTable();
 
-        Button sampleButton = new Button("查看");
-        sampleButton.setId("例题");
-        newWordViewTable.addItems(sampleButton);
+        Button resButton = new Button("答案");
+        resButton.setId("答案");
+        newExampleViewTable.addItems(resButton);
 
         Button editButton = new Button("修改");
         editButton.setId("修改");
-        newWordViewTable.addItems(editButton);
+        newExampleViewTable.addItems(editButton);
 
-        newWordViewTable.setCheckBox(null);
+        newExampleViewTable.setCheckBox(null);
 
         //设定初始
-        tableviewSeting = new TableViewCustom(newWordViewTable, "read");
+        tableviewSeting = new TableViewCustom(newExampleViewTable, "read");
 
         //初始化列表
         tableviewSeting.setTableViewColumn();
@@ -168,43 +188,56 @@ public class ExampleInputCenter {
     private void searchTableView() throws Exception {
         //查询数据
         // where t.F_SYS_FLAG = '1' limit 0,50 ：limit就是分页用方法
-        List<WordRecord> list = dataBaseManager.selectObject(WordRecord.class, " where t.F_SYS_FLAG = '1'");
+        List<WordTopic> list = dataBaseManager.selectObject(WordTopic.class, " where t.F_SYS_FLAG = '1' and t.F_TITLE = " + wordRecord.getPid());
 
         //设定提交列表用的列表model
-        List<WordViewTable> viewList = new ArrayList<WordViewTable>();
-        for (final WordRecord wordRecord : list) {
-            WordViewTable wordViewTable = new WordViewTable();
+        List<ExampleViewTable> viewList = new ArrayList<ExampleViewTable>();
+        for (final WordTopic wordTopic : list) {
+            ExampleViewTable exampleViewTable = new ExampleViewTable();
 
-            wordViewTable.setContect(wordRecord.getContect());
-            wordViewTable.setExample(wordRecord.getExample());
-            wordViewTable.setTrans(wordRecord.getTrans());
-            wordViewTable.setType(wordRecord.getType());
-            wordViewTable.setWordRecord(wordRecord);
+            exampleViewTable.setContect(wordTopic.getContect());
+            exampleViewTable.setType(wordTopic.getType());
+            exampleViewTable.setWordTopic(wordTopic);
 
-            Button sampleButton = new Button("查看");
-            sampleButton.setId("例题");
-            wordViewTable.addItems(sampleButton);
+            Button resButton = new Button("答案");
+            resButton.setId("答案");
+            resButton.setOnAction(new EventHandler<ActionEvent>() {
 
-            Button editButton = new Button("修改");
-            editButton.setId("修改");
-            editButton.setOnAction(new EventHandler<ActionEvent>(){
                 @Override
                 public void handle(ActionEvent arg0) {
                     innerGroupView = new InnerGroupView(taksObject);
 
                     innerGroupView.newInnerView(null, null, rootName);
                     try {
-                        innerGroupView.newRoot.getChildren().add(newSavePlant(wordRecord));
+                        innerGroupView.newRoot.getChildren().add(answerPlant(wordTopic));
                     } catch (Exception ex) {
                         Logger.getLogger(WordInputCenter.class.getName()).log(Level.SEVERE, null, ex);
                     }
                 }
             });
-            wordViewTable.addItems(editButton);
+            exampleViewTable.addItems(resButton);
 
-            wordViewTable.setCheckBox(null);
+            Button editButton = new Button("修改");
+            editButton.setId("修改");
+            editButton.setOnAction(new EventHandler<ActionEvent>() {
 
-            viewList.add(wordViewTable);
+                @Override
+                public void handle(ActionEvent arg0) {
+                    innerGroupView = new InnerGroupView(taksObject);
+
+                    innerGroupView.newInnerView(null, null, rootName);
+                    try {
+                        innerGroupView.newRoot.getChildren().add(newSavePlant(wordTopic));
+                    } catch (Exception ex) {
+                        Logger.getLogger(WordInputCenter.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                }
+            });
+            exampleViewTable.addItems(editButton);
+
+            exampleViewTable.setCheckBox(null);
+
+            viewList.add(exampleViewTable);
         }
 
         tableview = tableviewSeting.setTableViewData(viewList);
@@ -215,11 +248,11 @@ public class ExampleInputCenter {
      *
      * @return
      */
-    public Node newSavePlant(WordRecord wordRecord) throws Exception {
-        if (wordRecord != null) {
-            editWordRecord = wordRecord;
+    public Node newSavePlant(WordTopic wordTopic) throws Exception {
+        if (wordTopic != null) {
+            editWordTopic = wordTopic;
         } else {
-            editWordRecord = new WordRecord();
+            editWordTopic = new WordTopic();
         }
 
         HBox firstHbox = new HBox();
@@ -245,72 +278,35 @@ public class ExampleInputCenter {
         firstHbox.setSpacing(20);
         firstHbox.getChildren().addAll(accButton, canButton);
 
-        HBox secondHbox = new HBox();
-
         HBox typeHbox = new HBox(2);
         Label typeLabel = new Label("类型");
         final ComboBox<String> typeCombo = new ComboBox<String>();
         typeCombo.setId("edit-ComboBox");
         typeCombo.setEditable(true);
-        if(wordRecord!=null&&wordRecord.getType()!=null){
-                typeCombo.setValue(wordRecord.getType());
-                typeCombo.setPromptText(wordRecord.getType());
+        if (wordTopic != null && wordTopic.getType() != null) {
+            typeCombo.setValue(wordTopic.getType());
+            typeCombo.setPromptText(wordTopic.getType());
         }
-        List<Object[]> list=dataBaseManager.selectObject("select t.F_TYPE from T_WORD_RECORD t where t.F_SYS_FLAG='1' and t.F_TYPE is not null");
-        
-        String firstCol=null;
-        int i=0;
-        for(Object[] obj:list){
-            if(i==0){
-                firstCol=obj[0].toString();
-            }
-            typeCombo.getItems().add(obj[0].toString());
-            i++;
-        }
-        if(wordRecord==null){
+        List<Object[]> list = dataBaseManager.selectObject("select t.F_TYPE from T_WORD_TOPIC t where t.F_SYS_FLAG='1' and t.F_TYPE is not null");
+
+        if (wordTopic == null) {
             typeCombo.getSelectionModel().selectFirst();
         }
         typeCombo.setMaxWidth(150);
-
+        typeHbox.setPadding(new Insets(5,5,5,5));
+        typeHbox.setSpacing(10);
         typeHbox.getChildren().addAll(typeLabel, typeCombo);
 
-        HBox wordHbox = new HBox(2);
-        Label wordLabel = new Label("词条");
-        final TextField wordText = new TextField();
-        if(wordRecord!=null&&wordRecord.getContect()!=null){
-            wordText.setText(wordRecord.getContect());
+        VBox wordHbox = new VBox(2);
+        Label wordLabel = new Label("题目");
+        final TextArea wordText = new TextArea();
+        if (wordTopic != null && wordTopic.getContect() != null) {
+            wordText.setText(wordTopic.getContect());
         }
-        wordText.setPrefWidth(250);
+        wordHbox.setPadding(new Insets(5,5,5,5));
+        wordHbox.setSpacing(10);
+        wordText.setPrefWidth(400);
         wordHbox.getChildren().addAll(wordLabel, wordText);
-
-        //设定Hbox之间的相隔距离、和HBox内部构件之间的空间距离
-        secondHbox.setPadding(new Insets(25, 5, 5, 5));
-        secondHbox.setSpacing(20);
-        secondHbox.getChildren().addAll(typeHbox, wordHbox);
-
-        HBox thirdHbox = new HBox();
-        HBox transHbox = new HBox(2);
-        Label transLabel = new Label("解释");
-        final TextArea transText = new TextArea();
-        if(wordRecord!=null&&wordRecord.getTrans()!=null){
-            transText.setText(wordRecord.getTrans());
-        }
-        transText.setPrefSize(200, 100);
-        transHbox.getChildren().addAll(transLabel, transText);
-
-        HBox sampleHbox = new HBox(2);
-        Label sampleLabel = new Label("例句");
-        final TextArea sampleText = new TextArea();
-        if(wordRecord!=null&&wordRecord.getExample()!=null){
-            sampleText.setText(wordRecord.getExample());
-        }
-        sampleText.setPrefSize(200, 100);
-        sampleHbox.getChildren().addAll(sampleLabel, sampleText);
-
-        //设定Hbox之间的相隔距离、和HBox内部构件之间的空间距离
-        thirdHbox.setPadding(new Insets(25, 5, 5, 5));
-        thirdHbox.setSpacing(20);
-        thirdHbox.getChildren().addAll(transHbox, sampleHbox);
 
         //设定一个提示值，暂时永久提示下拉输入框输入值后要按回车提交值
         Label tipLabel = new Label("如果类型是输入的，请一定要记得输入完后按回车");
@@ -319,11 +315,12 @@ public class ExampleInputCenter {
         tipLabel.setFont(new Font("黑体", 12d));
 
         VBox vbox = new VBox();
-        
+
         //因为显示的问题目前妥协成这样：首先做成非编辑框用以显示默认值，如果点击则改成编辑框
         typeCombo.setEditable(false);
         typeCombo.setPromptText(typeCombo.getValue());
-        typeCombo.setOnMouseClicked(new EventHandler<MouseEvent>(){
+        typeCombo.setOnMouseClicked(new EventHandler<MouseEvent>() {
+
             @Override
             public void handle(MouseEvent arg0) {
                 typeCombo.setEditable(true);
@@ -331,24 +328,23 @@ public class ExampleInputCenter {
                 System.out.println(typeCombo.getValue());
             }
         });
-        
-        vbox.getChildren().addAll(firstHbox, secondHbox, thirdHbox, tipLabel);
+
+        vbox.getChildren().addAll(firstHbox, typeHbox, wordHbox, tipLabel);
 
         accButton.setOnAction(new EventHandler<ActionEvent>() {
 
             @Override
             public void handle(ActionEvent arg0) {
                 if (typeCombo.getValue() != null && !typeCombo.getValue().isEmpty()) {
-                    editWordRecord.setType(typeCombo.getValue());
-                    editWordRecord.setContect(wordText.getText());
-                    editWordRecord.setExample(sampleText.getText());
-                    editWordRecord.setTrans(transText.getText());
-                    editWordRecord.setCreateTime(DateBean.getSysdateTime());
-                    if (editWordRecord.getPid() == null) {
-                        editWordRecord.setSysFlag("1");
+                    editWordTopic.setType(typeCombo.getValue());
+                    editWordTopic.setContect(wordText.getText());
+                    editWordTopic.setCreateTime(DateBean.getSysdateTime());
+                    if (editWordTopic.getPid() == null) {
+                        editWordTopic.setSysFlag("1");
+                        editWordTopic.setTitle(wordRecord.getPid());
                     }
                     try {
-                        taksObject.save(editWordRecord);
+                        taksObject.save(editWordTopic);
                     } catch (Exception ex) {
                         Logger.getLogger(WordInputCenter.class.getName()).log(Level.SEVERE, null, ex);
                     }
@@ -370,5 +366,161 @@ public class ExampleInputCenter {
             }
         });
         return vbox;
+    }
+
+    public Node answerPlant(final WordTopic wordtopic) throws Exception {
+        final VBox answerBox = new VBox();
+
+        HBox buttonBox = new HBox();
+        Button closeButton = new Button("关闭");
+        closeButton.setOnAction(new EventHandler<ActionEvent>() {
+
+            @Override
+            public void handle(ActionEvent arg0) {
+                Iterator<Node> its = taksObject.getRoot().getChildren().iterator();
+                while (its.hasNext()) {
+                    Node node = its.next();
+                    node.setDisable(false);
+                }
+                taksObject.getRoot().getChildren().remove((Node) taksObject.rootMap.get(rootName));
+                taksObject.rootMap.remove(rootName);
+            }
+        });
+        buttonBox.getChildren().add(closeButton);
+        buttonBox.setPadding(new Insets(10,10,10,10));
+        buttonBox.setSpacing(20);
+        answerBox.getChildren().add(buttonBox);
+
+        HBox connectBox = new HBox();
+
+        final CheckBox trueAnswerBox = new CheckBox("是否正确答案？");
+        trueAnswerBox.setSelected(false);
+
+        final TextField textField = new TextField();
+        textField.setPromptText("这里填写答案内容");
+
+        Button setInButton = new Button("添加");
+        setInButton.setOnAction(new EventHandler<ActionEvent>() {
+
+            @Override
+            public void handle(ActionEvent arg0) {
+                if (textField.getText() != null && !textField.getText().isEmpty()) {
+                    WordTopicAnswer wordanswer = new WordTopicAnswer();
+                    wordanswer.setAnswer(textField.getText());
+                    if (trueAnswerBox.isSelected()) {
+                        wordanswer.setIstrue("1");
+                    } else {
+                        wordanswer.setIstrue("0");
+                    }
+                    wordanswer.setParentId(wordtopic.getPid());
+                    wordanswer.setCreateTime(DateBean.getSysdateTime());
+                    wordanswer.setType("select");
+                    wordanswer.setSysFlag("1");
+                    try {
+                        taksObject.save(wordanswer);
+                    } catch (Exception ex) {
+                        Logger.getLogger(ExampleInputCenter.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                    
+                    textField.clear();
+                    trueAnswerBox.setSelected(false);
+
+                    answerBox.getChildren().remove(scrollpane);
+                    try {
+                        scrollpane = getWordAnswer(wordtopic);
+                    } catch (Exception ex) {
+                        Logger.getLogger(ExampleInputCenter.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                    answerBox.getChildren().add(scrollpane);
+                }
+            }
+        });
+        connectBox.getChildren().addAll(trueAnswerBox, textField, setInButton);
+        connectBox.setPadding(new Insets(5, 10, 10, 10));
+        connectBox.setSpacing(10);
+        answerBox.getChildren().add(connectBox);
+
+        Button delButton = new Button("删除");
+        delButton.setOnAction(new EventHandler<ActionEvent>() {
+
+            @Override
+            public void handle(ActionEvent arg0) {
+                VBox vbox = (VBox) scrollpane.getContent();
+                Iterator it = vbox.getChildren().iterator();
+                while (it.hasNext()) {
+                    HBox hbox = (HBox) it.next();
+                    CheckBox checkbox = (CheckBox) hbox.getChildren().get(0);
+                    if (checkbox.isSelected()) {
+                        WordTopicAnswer wordAns = (WordTopicAnswer) checkbox.getUserData();
+                        wordAns.setSysFlag("0");
+                        try {
+                            taksObject.save(wordAns);
+                        } catch (Exception ex) {
+                            Logger.getLogger(ExampleInputCenter.class.getName()).log(Level.SEVERE, null, ex);
+                        }
+                    }
+                }
+                answerBox.getChildren().remove(scrollpane);
+                try {
+                    scrollpane = getWordAnswer(wordtopic);
+                } catch (Exception ex) {
+                    Logger.getLogger(ExampleInputCenter.class.getName()).log(Level.SEVERE, null, ex);
+                }
+                answerBox.getChildren().add(scrollpane);
+            }
+        });
+        answerBox.getChildren().add(delButton);
+
+        scrollpane = this.getWordAnswer(wordtopic);
+        answerBox.getChildren().add(scrollpane);
+
+        return answerBox;
+    }
+
+    @SuppressWarnings({"unchecked", "fallthrough"})
+    public ScrollPane getWordAnswer(WordTopic wordtopic) throws Exception {
+        ScrollPane scrollpane = new ScrollPane();
+
+        List<WordTopicAnswer> list = dataBaseManager.selectObject(WordTopicAnswer.class, " where t.F_PARENT_ID=" + wordtopic.getPid()
+                + " and t.f_sys_flag='1'");
+        VBox vbox = new VBox();
+        vbox.setMinWidth(400);
+        
+        HBox firstbox=new HBox(3);
+        Label checkLabel=new Label(" ");
+        checkLabel.setPrefWidth(20);
+        Label tureLabel=new Label("是否正确答案");
+        tureLabel.setPrefWidth(100);
+        Label firanslabel=new Label("答案内容");
+        firstbox.setSpacing(20);
+        firstbox.getChildren().addAll(checkLabel,tureLabel,firanslabel);
+        
+        vbox.getChildren().add(firstbox);
+        
+        for (WordTopicAnswer wordTopicAnswer : list) {
+            HBox hbox = new HBox(3);
+            CheckBox checkBox = new CheckBox();
+            checkBox.setSelected(false);
+            checkBox.setUserData(wordTopicAnswer);
+            checkBox.setPrefWidth(20);
+
+            String hasWord = "否";
+            if (wordTopicAnswer.getIstrue().equals("1")) {
+                hasWord = "是";
+            }
+
+            Label label = new Label(hasWord);
+            label.setPrefWidth(100);
+            Label ansLabel = new Label(wordTopicAnswer.getAnswer());
+            
+            hbox.setSpacing(20);
+            hbox.getChildren().addAll(checkBox, label, ansLabel);
+
+            vbox.getChildren().add(hbox);
+        }
+        scrollpane.autosize();
+        scrollpane.setContent(vbox);
+
+        return scrollpane;
     }
 }

@@ -24,7 +24,7 @@ public class ExampleViewTable extends ModelBase {
     @SuppressWarnings({"unchecked", "fallthrough"})
     public TableViewColumnSet[] read() {
         setTableViewColumn(new TableViewColumnSet[]{
-                    new TableViewColumnSet("contect", "题目", 450d, null, contect),
+                    new TableViewColumnSet("contect", "题目", 750d, null, contect),
                     new TableViewColumnSet("type", "题目类型", 70d, null, type)});
         return this.getTableViewColsSet();
     }

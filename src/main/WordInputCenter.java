@@ -182,6 +182,17 @@ public class WordInputCenter {
 
             Button sampleButton = new Button("查看");
             sampleButton.setId("例题");
+            sampleButton.setOnAction(new EventHandler<ActionEvent>(){
+                @Override
+                public void handle(ActionEvent arg0) {
+                    try {
+                        new ExampleInputCenter(taksObject,wordRecord).ExampleView();
+                    } catch (Exception ex) {
+                        Logger.getLogger(WordInputCenter.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                }
+                
+            });
             wordViewTable.addItems(sampleButton);
 
             Button editButton = new Button("修改");

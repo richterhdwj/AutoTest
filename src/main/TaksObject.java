@@ -109,7 +109,8 @@ public class TaksObject {
         return chart;
     }
     
-    public void save(Object obj) throws Exception{
+    public Object save(Object obj) throws Exception{
         database.save(obj);
+        return database.selectObject(obj.getClass(), null);
     }
 }

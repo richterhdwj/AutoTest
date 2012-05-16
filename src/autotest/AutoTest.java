@@ -58,16 +58,12 @@ public class AutoTest extends Application {
 
     @Override
     public void start(Stage primaryStage) throws Exception {
-        StageSample a=new StageSample();
-        a.start(primaryStage);
-//        taksObject = new TaksObject();
-//        this.primaryStage = primaryStage;
-//        init(primaryStage);
-//        primaryStage.show();
-//        System.out.println(primaryStage.isFocused());
-//        if (primaryStage.isFocused()) {
-//            primaryStage.show();
-//        }
+//        StageSample a=new StageSample();
+//        a.start(primaryStage);
+        taksObject = new TaksObject();
+        this.primaryStage = primaryStage;
+        init(primaryStage);
+        primaryStage.show();
     }
 
     @SuppressWarnings("ResultOfObjectAllocationIgnored")
@@ -203,23 +199,6 @@ public class AutoTest extends Application {
                         }
                     });
             threadUpDate.start();
-
-            Thread everTopShow = new Thread(
-                    new Runnable() {
-
-                        @Override
-                        public void run() {
-                            while(true){
-                                try {
-                                    sleep(1000);
-                                } catch (InterruptedException ex) {
-                                    Logger.getLogger(AutoTest.class.getName()).log(Level.SEVERE, null, ex);
-                                }
-                                System.out.println(primaryStage.isFocused());
-                            }
-                        }
-                    });
-            everTopShow.start();
         }
     }
 }

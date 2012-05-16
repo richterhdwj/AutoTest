@@ -8,16 +8,14 @@ package main.databaseModel;
  *
  * @author hdwjy
  */
-public class WordTopic {
-    private String tableName="T_WORD_TOPIC";
+public class WordTopicAnswer {
+    private String tableName="T_WORD_TOPIC_ANSWER";
     
     private String pid;
-    private String contect;
-    private String answer;//答案的SEQ
-    private String title; //词汇的SEQ
+    private String parentId;
+    private String answer; //答案内容
+    private String istrue; //是否为正确答案
     private String type;
-    private String attention;
-    private String accept;
     private String createTime;
     private String sysFlag;
     
@@ -25,23 +23,13 @@ public class WordTopic {
         return new String[][]{
             {"tableName",tableName,"TableName"},
             {"pid","F_PID","mainKey"},
-            {"contect","F_CONTECT","String"},
+            {"parentId","F_PARENT_ID","String"},
             {"answer","F_ANSWER","String"},
-            {"title","F_TITLE","String"},
+            {"istrue","F_ISTRUE","String"},
             {"type","F_TYPE","String"},
-            {"attention","F_ATTENTION","String"},
-            {"accept","F_ACCEPT","String"},
             {"createTime","F_CREATTIME","String"},
             {"sysFlag","F_SYS_FLAG","String"}
         };
-    }
-
-    public String getAccept() {
-        return accept;
-    }
-
-    public void setAccept(String accept) {
-        this.accept = accept;
     }
 
     public String getAnswer() {
@@ -52,28 +40,28 @@ public class WordTopic {
         this.answer = answer;
     }
 
-    public String getAttention() {
-        return attention;
-    }
-
-    public void setAttention(String attention) {
-        this.attention = attention;
-    }
-
-    public String getContect() {
-        return contect;
-    }
-
-    public void setContect(String contect) {
-        this.contect = contect;
-    }
-
     public String getCreateTime() {
         return createTime;
     }
 
     public void setCreateTime(String createTime) {
         this.createTime = createTime;
+    }
+
+    public String getIstrue() {
+        return istrue;
+    }
+
+    public void setIstrue(String istrue) {
+        this.istrue = istrue;
+    }
+
+    public String getParentId() {
+        return parentId;
+    }
+
+    public void setParentId(String parentId) {
+        this.parentId = parentId;
     }
 
     public String getPid() {
@@ -100,14 +88,6 @@ public class WordTopic {
         this.tableName = tableName;
     }
 
-    public String getTitle() {
-        return title;
-    }
-
-    public void setTitle(String title) {
-        this.title = title;
-    }
-
     public String getType() {
         return type;
     }
@@ -115,6 +95,5 @@ public class WordTopic {
     public void setType(String type) {
         this.type = type;
     }
-    
     
 }
