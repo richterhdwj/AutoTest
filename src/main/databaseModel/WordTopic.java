@@ -15,7 +15,7 @@ public class WordTopic {
     private String contect;
     private String answer;//答案的SEQ
     private String title; //词汇的SEQ
-    private String type;
+    private String type;  //词汇还是语法的类型
     private String attention;
     private String accept;
     private String createTime;
