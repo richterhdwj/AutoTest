@@ -688,7 +688,6 @@ public class DateBean {
 		try {
 			d = df.parse(datetime);
 		} catch (ParseException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		rDate = df.format(new Date(d.getTime() + days * 24 * 60 * 60 * 1000));

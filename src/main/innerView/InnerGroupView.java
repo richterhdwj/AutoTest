@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Random;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
@@ -44,6 +45,7 @@ public class InnerGroupView extends Thread {
     public Button canButton;
     private ToggleGroup tg;
     private Stage stage;
+    private Thread nextThread;
 
     public InnerGroupView(TaksObject taksObject) {
         this.taksObject = taksObject;
@@ -170,6 +172,8 @@ public class InnerGroupView extends Thread {
     private double initY;
     private Group rootGroup;
     private Node tempNode;
+    private double winWidth = 600d;
+    private double winHeight = 260d;
 
     public void rewakeConfirm(Group root) {
         this.rewake(root, "confirm");
@@ -180,14 +184,14 @@ public class InnerGroupView extends Thread {
      */
     public void newOutView() throws Exception {
         //将问答器的开关打开，避免重复打开
-        taksObject.setHasAnswer(false);
+        taksObject.setHasAnswer(true);
         //create stage which has set stage style undecorated
         stage = new Stage(StageStyle.UNDECORATED);
         stage.setResizable(false);
         //create root node of scene, i.e. group
         rootGroup = new Group();
         //create scene with set width, height and color
-        Scene scene = new Scene(rootGroup, 580, 400, Color.BLACK);
+        Scene scene = new Scene(rootGroup, winWidth, winHeight, Color.BLACK);
         //set scene to stage
         stage.setScene(scene);
         //center stage on screen
@@ -198,8 +202,8 @@ public class InnerGroupView extends Thread {
             width = ViewParamets.getScreenWidth();
             height = ViewParamets.getScreenHeight();
         }
-        stage.setX(width - 600);
-        stage.setY(height - 500);
+        stage.setX(width - winWidth - 20);
+        stage.setY(height - winHeight - 100);
         //show the stage
         stage.show();
 
@@ -224,7 +228,7 @@ public class InnerGroupView extends Thread {
         });
 
         // rectangle with adjustable translate
-        Rectangle rect = new Rectangle(580, 400, Color.web("fde7e3"));
+        Rectangle rect = new Rectangle(winWidth, winHeight, Color.web("fde7e3"));
 
         Button canbutton = new Button("关闭");
         canbutton.setStyle("-fx-base: rgb(30,170,255);");
@@ -232,6 +236,11 @@ public class InnerGroupView extends Thread {
 
             @Override
             public void handle(ActionEvent t) {
+                try {
+                    nextThread.interrupt();
+                } catch (Exception e) {
+                }
+                taksObject.setHasAnswer(false);
                 stage.close();
             }
         });
@@ -241,7 +250,9 @@ public class InnerGroupView extends Thread {
         rootGroup.getChildren().addAll(rect, canbutton, tempNode);
     }
 
+    @SuppressWarnings("unchecked")
     public Node getExamplePlant() throws Exception {
+
         DataBaseManager dataBaseManager = new DataBaseManager();
         //架构底层
         StackPane stackPane = new StackPane();
@@ -274,7 +285,7 @@ public class InnerGroupView extends Thread {
         pid = wordTopic.getPid();
 
         Label titleLabel = new Label(example);
-        titleLabel.setPrefWidth(550);
+        titleLabel.setPrefWidth(this.winWidth - 20);
         titleLabel.setWrapText(true);
 
         //设置答案的排版
@@ -350,20 +361,46 @@ public class InnerGroupView extends Thread {
                     }
                 }
 
-                String trueAnswer = trueRb.getText();
+                final String trueAnswer = trueRb == null ? "" : trueRb.getText();
                 try {
-                    rootGroup.getChildren().remove(tempNode);
-                    tempNode=getSample(wordTopic,trueAnswer);
-                    rootGroup.getChildren().add(tempNode);
+
+                    Platform.runLater(new Runnable() { //这是线程冲突时使用的方法
+
+                        @Override
+                        public void run() {
+                            rootGroup.getChildren().remove(tempNode);
+                            try {
+                                tempNode = getSample(wordTopic, trueAnswer);
+                            } catch (Exception ex) {
+                                Logger.getLogger(InnerGroupView.class.getName()).log(Level.SEVERE, null, ex);
+                            }
+                            rootGroup.getChildren().add(tempNode);
+                        }
+                    });
                 } catch (Exception ex) {
                     Logger.getLogger(InnerGroupView.class.getName()).log(Level.SEVERE, null, ex);
                 }
             }
         });
+
+        plantBox.getChildren().addAll(titleLabel, answerbox, accButton);
+
+        plantBox.setPrefWidth(this.winWidth - 20);
+
+        plantBox.setAlignment(Pos.CENTER);
+
+        stackPane.setLayoutY(40);
+
+        stackPane.setPadding(new Insets(10, 10, 10, 10));
+
+        stackPane.setPrefWidth(this.winWidth);
+
+        stackPane.getChildren().add(plantBox);
         return stackPane;
     }
 
     //答对后展示答案和相关词条内容
+    @SuppressWarnings("unchecked")
     public Node getSample(WordTopic wordTopic, String trueAnswer) throws Exception {
         DataBaseManager dataBaseManager = new DataBaseManager();
         //架构底层
@@ -404,23 +441,53 @@ public class InnerGroupView extends Thread {
 
         plantBox.getChildren().addAll(exampleBox, wordBox);
 
+        plantBox.setPrefWidth(this.winWidth);
+
+        stackPane.getChildren().add(plantBox);
+
+        stackPane.setLayoutY(40);
+
+        stackPane.setPadding(new Insets(10, 10, 10, 10));
+
+        stackPane.setPrefWidth(580);
+
+        nextExample();
+
+        nextThread.start();
+        
+        if(taksObject.isHasFirstPage()){
+            taksObject.getBorderPane().setCenter(taksObject.ChartPane());
+        }
+
         return stackPane;
     }
 
     public void nextExample() throws Exception {
-        Thread thread = new Thread(
+        nextThread = new Thread(
                 new Runnable() {
+
                     @Override
                     public void run() {
-                        try{
-                            sleep(60 * 5 * 1000);
-                            if(!stage.isFocused())
+                        try {
+                            sleep(5 * 60 * 1000);
+                            if (!stage.isFocused()) {
                                 stage.toFront();
-                            rootGroup.getChildren().remove(tempNode);
-                            tempNode=getExamplePlant();
-                            rootGroup.getChildren().add(tempNode);
-                        }catch(Exception e){
-                            
+                            }
+
+                            Platform.runLater(new Runnable() { //这是线程冲突时使用的方法
+
+                                @Override
+                                public void run() {
+                                    rootGroup.getChildren().remove(tempNode);
+                                    try {
+                                        tempNode = getExamplePlant();
+                                    } catch (Exception ex) {
+                                        Logger.getLogger(InnerGroupView.class.getName()).log(Level.SEVERE, null, ex);
+                                    }
+                                    rootGroup.getChildren().add(tempNode);
+                                }
+                            });
+                        } catch (Exception e) {
                         }
                     }
                 });

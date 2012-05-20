@@ -191,9 +191,11 @@ public class AutoTest extends Application {
                                     taksObject.setRoot(root);
 
                                     root.getChildren().clear();
-
-
-                                    new MainViewPlant(taksObject);
+                                    try {
+                                        new MainViewPlant(taksObject);
+                                    } catch (Exception ex) {
+                                        Logger.getLogger(AutoTest.class.getName()).log(Level.SEVERE, null, ex);
+                                    }
                                 }
                             });
                         }

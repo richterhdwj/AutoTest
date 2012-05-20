@@ -5,6 +5,7 @@
 package main;
 
 import java.util.HashMap;
+import java.util.List;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.Group;
@@ -28,6 +29,7 @@ public class TaksObject {
     private Node firstPage;                                                     //页面临时缓存。
     private Node tempPage;
     private boolean hasAnswer=false;
+    private boolean hasFirstPage=true;
     public HashMap rootMap=new HashMap();
     
     private DataBaseManager database=new DataBaseManager();
@@ -79,37 +81,74 @@ public class TaksObject {
     public void setHasAnswer(boolean hasAnswer) {
         this.hasAnswer = hasAnswer;
     }
+
+    public boolean isHasFirstPage() {
+        return hasFirstPage;
+    }
+
+    public void setHasFirstPage(boolean hasFirstPage) {
+        this.hasFirstPage = hasFirstPage;
+    }
     
     /**
      * 首页的展示
      * @return 
      */
     @SuppressWarnings({"unchecked","fallthrough"})
-    public Node ChartPane(){
+    public Node ChartPane() throws Exception{
+        List<Object[]> titlelist=database.selectObject("SELECT distinct t1.f_type FROM t_word_topic t,t_word_record t1 where t.f_title=t1.f_pid and t.f_sys_flag='1' and t1.f_sys_flag='1'");
         
-        String[] years = {"2007", "2008", "2009"};
+        String[] titles=new String[titlelist.size()];
+        int i=0;
+        
+        List<Object[]> maxValueList=database.selectObject("SELECT ifnull(max(t.f_attention),0) FROM t_word_topic t,t_word_record t1 where t.f_title=t1.f_pid and t.f_sys_flag='1' and t1.f_sys_flag='1'");
+                
+        Integer maxValueLength = maxValueList.get(0)[0].toString().length();
+        if(maxValueLength<1)
+            maxValueLength=1;
+        
+        int maxValue=1;
+        
+        for(int m=0;m<maxValueLength;m++){
+            maxValue=maxValue*10;
+        }
+        
+        int nextValue = maxValue/10;
+        
+        if(nextValue<1)
+            nextValue=1;
+        
+        NumberAxis yAxis = new NumberAxis("正确率", 0 , maxValue, nextValue);
+        
+        ObservableList attList=FXCollections.observableArrayList();
+        
+        ObservableList accList=FXCollections.observableArrayList();
+        
+        for(Object[] objs:titlelist){
+            titles[i]=objs[0].toString();
+            
+            List<Object[]> trueList=database.selectObject("SELECT ifnull(sum(t.f_attention),0),ifnull(sum(t.f_accept),0) "
+                    + "FROM t_word_topic t,t_word_record t1 where "
+                    + "t.f_title=t1.f_pid and t.f_sys_flag='1' "
+                    + "and t1.f_sys_flag='1' and t1.f_type = '"
+                    + objs[0].toString()
+                    + "'");
+            int attention = Integer.parseInt(trueList.get(0)[0].toString());
+            attList.add(new BarChart.Data(objs[0].toString(), attention));
+            int accept = Integer.parseInt(trueList.get(0)[1].toString());
+            accList.add(new BarChart.Data(objs[0].toString(), accept));
+            
+            i++;
+        }
+        
         CategoryAxis xAxis = new CategoryAxis();
-        xAxis.setCategories(FXCollections.<String>observableArrayList(years));
-        NumberAxis yAxis = new NumberAxis("Units Sold", 0.0d, 3000.0d, 1000.0d);
+        xAxis.setCategories(FXCollections.<String>observableArrayList(titles));
         
-        XYChart.Data temp=new BarChart.Data(years[0], 567d);
         ObservableList<BarChart.Series> barChartData = FXCollections.observableArrayList(
-            new BarChart.Series("Apples", FXCollections.observableArrayList(
-               temp,
-               new BarChart.Data(years[1], 1292d),
-               new BarChart.Data(years[2], 1292d)
-            )),
-            new BarChart.Series("Lemons", FXCollections.observableArrayList(
-               new BarChart.Data(years[0], 956),
-               new BarChart.Data(years[1], 1665),
-               new BarChart.Data(years[2], 2559)
-            )),
-            new BarChart.Series("Oranges", FXCollections.observableArrayList(
-               new BarChart.Data(years[0], 1154),
-               new BarChart.Data(years[1], 1927),
-               new BarChart.Data(years[2], 2774)
-            ))
+            new BarChart.Series("做题总数", attList),
+            new BarChart.Series("正确率", accList)
         );
+        
         BarChart chart = new BarChart(xAxis, yAxis, barChartData, 25.0d);
         
         chart.setPrefSize(1024, 480);

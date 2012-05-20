@@ -4,13 +4,17 @@
  */
 package main;
 
+import java.io.File;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.animation.Timeline;
 import javafx.animation.TranslateTransition;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.Group;
+import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
@@ -34,18 +38,19 @@ public class MainViewPlant {
     TranslateTransition rollTextLabelBak;
     Label moveLabel;
     Label moveLabelbak;
-    Font textlabelFont = new Font(24);
+    Font textlabelFont = new Font(24);;
+    private static String localPath = System.getProperty("user.dir") + System.getProperty("file.separator")+"Setin"+System.getProperty("file.separator"); //相对路径＋导入目录
 
     private Font getTexlabelFont() {
         return textlabelFont.font("黑体", FontWeight.LIGHT, 24);
     }
 
-    public MainViewPlant(TaksObject taksObject) {
+    public MainViewPlant(TaksObject taksObject) throws Exception {
         this.taksObject = taksObject;
         main();
     }
 
-    public void main() {
+    public void main() throws Exception {
         Group root = taksObject.getRoot();
         //设定主界面底层
         final BorderPane borderPane = new BorderPane();
@@ -65,6 +70,7 @@ public class MainViewPlant {
             public void handle(ActionEvent t) {
                 if (!taksObject.getRoot().getChildren().get(0).getClass().isInstance(new WordInputCenter(taksObject))) {
                     try {
+                        taksObject.setHasFirstPage(false);
                         new WordInputCenter(taksObject).WordView();
                     } catch (Exception ex) {
                         Logger.getLogger(MainViewPlant.class.getName()).log(Level.SEVERE, null, ex);
@@ -87,10 +93,52 @@ public class MainViewPlant {
                 }
             }
         });
-        final MenuItem menuSetup = MenuItemBuilder.create().text("基础设定").build();
+        final MenuItem menuSetin = MenuItemBuilder.create().text("数据导入").build();
+        menuSetin.setOnAction(new EventHandler<ActionEvent>() {
+
+            @Override
+            public void handle(ActionEvent t) {
+                InnerGroupView innerView = new InnerGroupView(taksObject);
+                innerView.newInnerView(300d, 200d, "setin");
+
+                ComboBox combo = new ComboBox();
+
+                ObservableList Lists = FXCollections.observableArrayList();
+                
+                File file=new File(localPath);
+                
+                File[] files=file.listFiles();
+                
+                //TODO::然后就是导入的数据格式设定和导入数据流处理方式
+                for(File getFile:files){
+                    if(!getFile.isDirectory()){
+                        String fileName=getFile.getName();
+                        if(fileName.endsWith("txt")){
+                            
+                        }
+                    }
+                }
+            }
+        });
+
+        final MenuItem menuChare = MenuItemBuilder.create().text("查看图表").build();
+        menuChare.setOnAction(new EventHandler<ActionEvent>() {
+
+            @Override
+            public void handle(ActionEvent t) {
+                if (!taksObject.isHasFirstPage()) {
+                    taksObject.setHasFirstPage(true);
+                    try {
+                        taksObject.getBorderPane().setCenter(taksObject.ChartPane());
+                    } catch (Exception ex) {
+                        Logger.getLogger(MainViewPlant.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                }
+            }
+        });
 
         // Options menu
-        Menu menu = MenuBuilder.create().text("开始").items(menuAdd, menuTest, menuSetup).build();
+        Menu menu = MenuBuilder.create().text("开始").items(menuAdd, menuTest, menuChare, menuSetin).build();
 
         menubar.getMenus().addAll(menu);
 
