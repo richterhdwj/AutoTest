@@ -4,7 +4,7 @@
  */
 package main;
 
-import java.io.File;
+import java.io.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.animation.Timeline;
@@ -13,6 +13,8 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.control.*;
@@ -33,13 +35,15 @@ import main.innerView.InnerGroupView;
  */
 public class MainViewPlant {
 
+    InnerGroupView innerView;
     TaksObject taksObject;
     TranslateTransition rollTextLabel;
     TranslateTransition rollTextLabelBak;
     Label moveLabel;
     Label moveLabelbak;
-    Font textlabelFont = new Font(24);;
-    private static String localPath = System.getProperty("user.dir") + System.getProperty("file.separator")+"Setin"+System.getProperty("file.separator"); //相对路径＋导入目录
+    Font textlabelFont = new Font(24);
+    ;
+    private static String localPath = System.getProperty("user.dir") + System.getProperty("file.separator") + "Setin" + System.getProperty("file.separator"); //相对路径＋导入目录
 
     private Font getTexlabelFont() {
         return textlabelFont.font("黑体", FontWeight.LIGHT, 24);
@@ -50,6 +54,7 @@ public class MainViewPlant {
         main();
     }
 
+    @SuppressWarnings({"unchecked", "fallthrough"})
     public void main() throws Exception {
         Group root = taksObject.getRoot();
         //设定主界面底层
@@ -98,26 +103,80 @@ public class MainViewPlant {
 
             @Override
             public void handle(ActionEvent t) {
-                InnerGroupView innerView = new InnerGroupView(taksObject);
+                innerView = new InnerGroupView(taksObject);
                 innerView.newInnerView(300d, 200d, "setin");
 
-                ComboBox combo = new ComboBox();
+                final ComboBox combo = new ComboBox();
 
                 ObservableList Lists = FXCollections.observableArrayList();
-                
-                File file=new File(localPath);
-                
-                File[] files=file.listFiles();
-                
+
+                File file = new File(localPath);
+
+                File[] files = file.listFiles();
+
                 //TODO::然后就是导入的数据格式设定和导入数据流处理方式
-                for(File getFile:files){
-                    if(!getFile.isDirectory()){
-                        String fileName=getFile.getName();
-                        if(fileName.endsWith("txt")){
-                            
+                if (files != null) {
+                    for (File getFile : files) {
+                        if (!getFile.isDirectory()) {
+                            String fileName = getFile.getName();
+                            if (fileName.endsWith("txt")) {
+                                Lists.add(fileName);
+                            }
                         }
                     }
                 }
+
+                combo.setItems(Lists);
+                combo.setPrefWidth(200);
+                combo.setPromptText("⋯⋯请选择要导入的数据");
+
+                Button accButton = new Button("确定");
+
+                accButton.setOnAction(new EventHandler<ActionEvent>() {
+
+                    @Override
+                    public void handle(ActionEvent t) {
+                        if (combo.getValue() != null) {
+                            try {
+                                taksObject.setInDataBase(localPath + combo.getValue());
+                            } catch (Exception ex) {
+                                Logger.getLogger(MainViewPlant.class.getName()).log(Level.SEVERE, null, ex);
+                            }
+                        }
+                    }
+                });
+
+                Button canButton = new Button("取消");
+
+                canButton.setOnAction(new EventHandler<ActionEvent>() {
+
+                    @Override
+                    public void handle(ActionEvent t) {
+                        innerView.rewake(null, "setin");
+                    }
+                });
+
+                HBox hbox = new HBox(2);
+
+                hbox.setSpacing(20);
+
+                hbox.setPadding(new Insets(10, 50, 10, 10));
+
+                hbox.setAlignment(Pos.CENTER_RIGHT);
+
+                hbox.getChildren().addAll(accButton, canButton);
+
+                VBox vbox = new VBox(2);
+
+                vbox.setAlignment(Pos.CENTER);
+
+                vbox.setSpacing(100);
+
+                vbox.getChildren().addAll(combo, hbox);
+
+                innerView.newRoot.setAlignment(Pos.CENTER);
+
+                innerView.newRoot.getChildren().add(vbox);
             }
         });
 

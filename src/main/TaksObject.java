@@ -4,6 +4,7 @@
  */
 package main;
 
+import java.io.*;
 import java.util.HashMap;
 import java.util.List;
 import javafx.collections.FXCollections;
@@ -23,16 +24,16 @@ import support.database.DataBaseManager;
  * @author hdwjy
  */
 public class TaksObject {
+
     private Group root;
     private Stage primaryStage;
     private BorderPane borderPane;                                              //主界面底层
     private Node firstPage;                                                     //页面临时缓存。
     private Node tempPage;
-    private boolean hasAnswer=false;
-    private boolean hasFirstPage=true;
-    public HashMap rootMap=new HashMap();
-    
-    private DataBaseManager database=new DataBaseManager();
+    private boolean hasAnswer = false;
+    private boolean hasFirstPage = true;
+    public HashMap rootMap = new HashMap();
+    private DataBaseManager database = new DataBaseManager();
 
     public Stage getPrimaryStage() {
         return primaryStage;
@@ -89,45 +90,48 @@ public class TaksObject {
     public void setHasFirstPage(boolean hasFirstPage) {
         this.hasFirstPage = hasFirstPage;
     }
-    
+
     /**
      * 首页的展示
-     * @return 
+     *
+     * @return
      */
-    @SuppressWarnings({"unchecked","fallthrough"})
-    public Node ChartPane() throws Exception{
-        List<Object[]> titlelist=database.selectObject("SELECT distinct t1.f_type FROM t_word_topic t,t_word_record t1 where t.f_title=t1.f_pid and t.f_sys_flag='1' and t1.f_sys_flag='1'");
-        
-        String[] titles=new String[titlelist.size()];
-        int i=0;
-        
-        List<Object[]> maxValueList=database.selectObject("SELECT ifnull(max(t.f_attention),0) FROM t_word_topic t,t_word_record t1 where t.f_title=t1.f_pid and t.f_sys_flag='1' and t1.f_sys_flag='1'");
-                
+    @SuppressWarnings({"unchecked", "fallthrough"})
+    public Node ChartPane() throws Exception {
+        List<Object[]> titlelist = database.selectObject("SELECT distinct t1.f_type FROM t_word_topic t,t_word_record t1 where t.f_title=t1.f_pid and t.f_sys_flag='1' and t1.f_sys_flag='1'");
+
+        String[] titles = new String[titlelist.size()];
+        int i = 0;
+
+        List<Object[]> maxValueList = database.selectObject("SELECT ifnull(max(t.f_attention),0) FROM t_word_topic t,t_word_record t1 where t.f_title=t1.f_pid and t.f_sys_flag='1' and t1.f_sys_flag='1'");
+
         Integer maxValueLength = maxValueList.get(0)[0].toString().length();
-        if(maxValueLength<1)
-            maxValueLength=1;
-        
-        int maxValue=1;
-        
-        for(int m=0;m<maxValueLength;m++){
-            maxValue=maxValue*10;
+        if (maxValueLength < 1) {
+            maxValueLength = 1;
         }
-        
-        int nextValue = maxValue/10;
-        
-        if(nextValue<1)
-            nextValue=1;
-        
-        NumberAxis yAxis = new NumberAxis("正确率", 0 , maxValue, nextValue);
-        
-        ObservableList attList=FXCollections.observableArrayList();
-        
-        ObservableList accList=FXCollections.observableArrayList();
-        
-        for(Object[] objs:titlelist){
-            titles[i]=objs[0].toString();
-            
-            List<Object[]> trueList=database.selectObject("SELECT ifnull(sum(t.f_attention),0),ifnull(sum(t.f_accept),0) "
+
+        int maxValue = 1;
+
+        for (int m = 0; m < maxValueLength; m++) {
+            maxValue = maxValue * 10;
+        }
+
+        int nextValue = maxValue / 10;
+
+        if (nextValue < 1) {
+            nextValue = 1;
+        }
+
+        NumberAxis yAxis = new NumberAxis("正确率", 0, maxValue, nextValue);
+
+        ObservableList attList = FXCollections.observableArrayList();
+
+        ObservableList accList = FXCollections.observableArrayList();
+
+        for (Object[] objs : titlelist) {
+            titles[i] = objs[0].toString();
+
+            List<Object[]> trueList = database.selectObject("SELECT ifnull(sum(t.f_attention),0),ifnull(sum(t.f_accept),0) "
                     + "FROM t_word_topic t,t_word_record t1 where "
                     + "t.f_title=t1.f_pid and t.f_sys_flag='1' "
                     + "and t1.f_sys_flag='1' and t1.f_type = '"
@@ -137,28 +141,43 @@ public class TaksObject {
             attList.add(new BarChart.Data(objs[0].toString(), attention));
             int accept = Integer.parseInt(trueList.get(0)[1].toString());
             accList.add(new BarChart.Data(objs[0].toString(), accept));
-            
+
             i++;
         }
-        
+
         CategoryAxis xAxis = new CategoryAxis();
         xAxis.setCategories(FXCollections.<String>observableArrayList(titles));
-        
+
         ObservableList<BarChart.Series> barChartData = FXCollections.observableArrayList(
-            new BarChart.Series("做题总数", attList),
-            new BarChart.Series("正确率", accList)
-        );
-        
+                new BarChart.Series("做题总数", attList),
+                new BarChart.Series("正确率", accList));
+
         BarChart chart = new BarChart(xAxis, yAxis, barChartData, 25.0d);
-        
+
         chart.setPrefSize(1024, 480);
         chart.setTitle("综合成绩单");
-        
+
         return chart;
     }
-    
-    public Object save(Object obj) throws Exception{
+
+    public Object save(Object obj) throws Exception {
         database.save(obj);
         return database.selectObject(obj.getClass(), null);
+    }
+
+    public void setInDataBase(String url) throws Exception {
+        File file = new File(url);
+        InputStreamReader read = new InputStreamReader(new FileInputStream(file), "UTF-8");
+
+        BufferedReader br = new BufferedReader(read);
+        String temp = null;
+        StringBuffer sb = new StringBuffer();
+        temp = br.readLine();
+        while (temp != null) {
+            sb.append(temp + " ");
+            temp = br.readLine();
+        }
+        
+        sb.toString().split("单词");
     }
 }
