@@ -17,6 +17,9 @@ import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
+import main.databaseModel.WordRecord;
+import main.databaseModel.WordTopic;
+import support.DateBean;
 import support.database.DataBaseManager;
 
 /**
@@ -170,14 +173,65 @@ public class TaksObject {
         InputStreamReader read = new InputStreamReader(new FileInputStream(file), "UTF-8");
 
         BufferedReader br = new BufferedReader(read);
-        String temp = null;
         StringBuffer sb = new StringBuffer();
-        temp = br.readLine();
-        while (temp != null) {
-            sb.append(temp + " ");
-            temp = br.readLine();
-        }
+        String nowLine = br.readLine();
         
-        sb.toString().split("单词");
+        String wordType=null;
+        String word=null;
+        String wordExample=null;
+        String wordTrans=null;
+
+        String topicExample=null;
+        String topicAnswer=null;
+        
+        while (nowLine != null) {
+            if(nowLine.contains(":")){
+                nowLine.trim();
+                String[] tempLine=nowLine.split(":");
+                if(tempLine[0].equals("单词")||tempLine[0].equals("语法")){
+                    wordType=tempLine[0];                                       //获取词条类型
+                    nowLine=nowLine.substring(nowLine.indexOf(";"));            
+                    continue;
+                }else if(tempLine[0].equals("例句")){ 
+                    wordExample = tempLine[1];                                  //获取例句
+                }else{
+                    word=tempLine[0];                                           //获取词条主要内容
+                    wordTrans=tempLine[1];                                      //获取词条解释
+                }
+            }else if(nowLine.contains(".")){
+                nowLine.trim();
+                String[] tempLine=nowLine.split(".",1);                         //含.的都看作题目，.后的为题目
+                topicExample=tempLine[1];
+                nowLine = br.readLine();                                        //他下面的一行全都看作答案,答案用|号分隔
+                tempLine=nowLine.split("|");
+                for(String nowAnswer:tempLine){
+                    String[] answers=nowAnswer.split(".");
+                    
+                    WordRecord wordRecord=null;                                 //每个答案进行一次保存。
+                    List<WordRecord> list=database.selectObject(WordRecord.class,                       //这里保存词条
+                            " where t.F_CONTECT = '"+word+"' ans t.f_sys_flag='1'");
+                    if(list.size()>0){
+                        wordRecord=list.get(0);                                                         //不重复保存，已有的词条查出来
+                    }else{
+                        String saveTime=DateBean.getSysdateTime();
+                        wordRecord=new WordRecord();
+                        wordRecord.setType(wordType);
+                        wordRecord.setContect(word);
+                        wordRecord.setTrans(wordTrans);
+                        wordRecord.setExample(wordExample);
+                        wordRecord.setSysFlag("1");
+                        wordRecord.setCreateTime(saveTime);
+                        save(wordRecord);
+                        
+                        list=database.selectObject(WordRecord.class," where t.F_CREATTIME = '"+saveTime+"' ans t.f_sys_flag='1'");
+                        wordRecord=list.get(0);
+                    }
+                    //TODO:导入功能完成并测试
+                    List<WordTopic> listExample=database.selectObject(WordTopic.class,              //题目也是一样处理
+                            " where t.contect = '"+topicExample+"' and t.f_sys_flag='1'");
+                }
+            }
+            nowLine = br.readLine();
+        }
     }
 }
