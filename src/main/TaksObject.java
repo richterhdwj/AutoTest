@@ -226,9 +226,27 @@ public class TaksObject {
                         list=database.selectObject(WordRecord.class," where t.F_CREATTIME = '"+saveTime+"' ans t.f_sys_flag='1'");
                         wordRecord=list.get(0);
                     }
-                    //TODO:导入功能完成并测试
+                    WordTopic wordTopic=null;
                     List<WordTopic> listExample=database.selectObject(WordTopic.class,              //题目也是一样处理
                             " where t.contect = '"+topicExample+"' and t.f_sys_flag='1'");
+                    if(listExample.size()>0){
+                        wordTopic=listExample.get(0);
+                    }else{
+                        String saveTime=DateBean.getSysdateTime();
+                        wordTopic = new WordTopic();
+                        wordTopic.setTitle(wordRecord.getPid());
+                        wordTopic.setContect(topicExample);
+                        wordTopic.setType("选择题");                             //不管怎么样现在只考虑选择题吧
+                        wordTopic.setAccept("0");
+                        wordTopic.setAttention("0");
+                        wordTopic.setSysFlag("1");
+                        wordTopic.setCreateTime(saveTime);
+                        
+                        listExample=database.selectObject(WordTopic.class," where t.F_CREATTIME = '"+saveTime+"' ans t.f_sys_flag='1'");
+                        wordTopic=listExample.get(0);
+                    }
+                    
+                    //TODO:最后一部分得答案管理
                 }
             }
             nowLine = br.readLine();

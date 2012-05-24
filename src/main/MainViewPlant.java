@@ -5,6 +5,7 @@
 package main;
 
 import java.io.*;
+import java.net.URLEncoder;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.animation.Timeline;
@@ -111,7 +112,7 @@ public class MainViewPlant {
                 ObservableList Lists = FXCollections.observableArrayList();
 
                 File file = new File(localPath);
-
+                
                 File[] files = file.listFiles();
 
                 //TODO::然后就是导入的数据格式设定和导入数据流处理方式
@@ -119,6 +120,14 @@ public class MainViewPlant {
                     for (File getFile : files) {
                         if (!getFile.isDirectory()) {
                             String fileName = getFile.getName();
+                            
+                                try {
+                                    String changeCode=new String(getFile.getName().getBytes("UTF-8"),"UTF-8");
+                                    System.out.println(changeCode);
+                                } catch (UnsupportedEncodingException ex) {
+                                    Logger.getLogger(MainViewPlant.class.getName()).log(Level.SEVERE, null, ex);
+                                }
+                                
                             if (fileName.endsWith("txt")) {
                                 Lists.add(fileName);
                             }
