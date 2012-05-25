@@ -19,6 +19,7 @@ import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
 import main.databaseModel.WordRecord;
 import main.databaseModel.WordTopic;
+import main.databaseModel.WordTopicAnswer;
 import support.DateBean;
 import support.database.DataBaseManager;
 
@@ -247,6 +248,18 @@ public class TaksObject {
                     }
                     
                     //TODO:最后一部分得答案管理
+                    String finalAnswer=answers[1];
+                    WordTopicAnswer wordTopicAnswer=new WordTopicAnswer();
+                    wordTopicAnswer.setParentId(wordTopic.getPid());
+                    wordTopicAnswer.setAnswer(finalAnswer);
+                    if(answers[0].toLowerCase().equals("t")){
+                        wordTopicAnswer.setIstrue("1");
+                    }else{
+                        wordTopicAnswer.setIstrue("0");
+                    }
+                    wordTopicAnswer.setSysFlag("1");
+                    wordTopicAnswer.setCreateTime(DateBean.getSysdateTime());
+                    save(wordTopicAnswer);
                 }
             }
             nowLine = br.readLine();
