@@ -7,6 +7,8 @@ package main;
 import java.io.*;
 import java.util.HashMap;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.Group;
@@ -27,7 +29,7 @@ import support.database.DataBaseManager;
  *
  * @author hdwjy
  */
-public class TaksObject {
+public class TaksObject extends Thread{
 
     private Group root;
     private Stage primaryStage;
@@ -164,11 +166,13 @@ public class TaksObject {
         return chart;
     }
 
+    @SuppressWarnings({"unchecked", "fallthrough"})
     public Object save(Object obj) throws Exception {
         database.save(obj);
         return database.selectObject(obj.getClass(), null);
     }
 
+    @SuppressWarnings({"unchecked", "fallthrough"})
     public void setInDataBase(String url) throws Exception {
         File file = new File(url);
         InputStreamReader read = new InputStreamReader(new FileInputStream(file), "UTF-8");
@@ -185,36 +189,39 @@ public class TaksObject {
         String topicExample=null;
         String topicAnswer=null;
         
+        String saveTime=DateBean.getSysdateTime();
+        
         while (nowLine != null) {
-            if(nowLine.contains(":")){
+            if(nowLine.contains("：")){
                 nowLine.trim();
-                String[] tempLine=nowLine.split(":");
-                if(tempLine[0].equals("单词")||tempLine[0].equals("语法")){
-                    wordType=tempLine[0];                                       //获取词条类型
-                    nowLine=nowLine.substring(nowLine.indexOf(";"));            
-                    continue;
-                }else if(tempLine[0].equals("例句")){ 
-                    wordExample = tempLine[1];                                  //获取例句
-                }else{
-                    word=tempLine[0];                                           //获取词条主要内容
-                    wordTrans=tempLine[1];                                      //获取词条解释
-                }
-            }else if(nowLine.contains(".")){
+                String[] tempLine=nowLine.split("：");
+                if(tempLine.length>0)
+                    if(tempLine[0].equals("单词")||tempLine[0].equals("语法")){
+                        wordType=tempLine[0];                                       //获取词条类型
+                        nowLine=nowLine.substring(nowLine.indexOf("："));            
+                        continue;
+                    }else if(tempLine[0].equals("例句")){ 
+                        wordExample = tempLine[1];                                  //获取例句
+                    }else{
+                        word=tempLine[0];                                           //获取词条主要内容
+                        wordTrans=tempLine[1];                                      //获取词条解释
+                    }
+            }else if(nowLine.contains("・")){
                 nowLine.trim();
-                String[] tempLine=nowLine.split(".",1);                         //含.的都看作题目，.后的为题目
+                String[] tempLine=nowLine.split("・",0);                         //含.的都看作题目，.后的为题目
                 topicExample=tempLine[1];
                 nowLine = br.readLine();                                        //他下面的一行全都看作答案,答案用|号分隔
-                tempLine=nowLine.split("|");
+                tempLine=nowLine.split("｜");
                 for(String nowAnswer:tempLine){
-                    String[] answers=nowAnswer.split(".");
+                    String[] answers=nowAnswer.split("・");
                     
                     WordRecord wordRecord=null;                                 //每个答案进行一次保存。
                     List<WordRecord> list=database.selectObject(WordRecord.class,                       //这里保存词条
-                            " where t.F_CONTECT = '"+word+"' ans t.f_sys_flag='1'");
+                            " where t.F_CONTECT = '"+word+"' and t.f_sys_flag='1'");
                     if(list.size()>0){
                         wordRecord=list.get(0);                                                         //不重复保存，已有的词条查出来
                     }else{
-                        String saveTime=DateBean.getSysdateTime();
+                        saveTime=DateBean.getNextSecond(saveTime);
                         wordRecord=new WordRecord();
                         wordRecord.setType(wordType);
                         wordRecord.setContect(word);
@@ -224,16 +231,17 @@ public class TaksObject {
                         wordRecord.setCreateTime(saveTime);
                         save(wordRecord);
                         
-                        list=database.selectObject(WordRecord.class," where t.F_CREATTIME = '"+saveTime+"' ans t.f_sys_flag='1'");
+                        list=database.selectObject(WordRecord.class,                       //这里保存词条
+                            " where t.F_CONTECT = '"+word+"' and t.f_sys_flag='1'");
                         wordRecord=list.get(0);
                     }
                     WordTopic wordTopic=null;
                     List<WordTopic> listExample=database.selectObject(WordTopic.class,              //题目也是一样处理
-                            " where t.contect = '"+topicExample+"' and t.f_sys_flag='1'");
+                            " where t.F_CONTECT = '"+topicExample+"' and t.f_sys_flag='1'");
                     if(listExample.size()>0){
                         wordTopic=listExample.get(0);
                     }else{
-                        String saveTime=DateBean.getSysdateTime();
+                        saveTime=DateBean.getNextSecond(saveTime);
                         wordTopic = new WordTopic();
                         wordTopic.setTitle(wordRecord.getPid());
                         wordTopic.setContect(topicExample);
@@ -242,17 +250,19 @@ public class TaksObject {
                         wordTopic.setAttention("0");
                         wordTopic.setSysFlag("1");
                         wordTopic.setCreateTime(saveTime);
-                        
-                        listExample=database.selectObject(WordTopic.class," where t.F_CREATTIME = '"+saveTime+"' ans t.f_sys_flag='1'");
+                        save(wordTopic);
+                        listExample=database.selectObject(WordTopic.class,              //题目也是一样处理
+                            " where t.F_CONTECT = '"+topicExample+"' and t.f_sys_flag='1'");
                         wordTopic=listExample.get(0);
                     }
                     
                     //TODO:最后一部分得答案管理
                     String finalAnswer=answers[1];
                     WordTopicAnswer wordTopicAnswer=new WordTopicAnswer();
+                    wordTopicAnswer.setType("选择题");
                     wordTopicAnswer.setParentId(wordTopic.getPid());
                     wordTopicAnswer.setAnswer(finalAnswer);
-                    if(answers[0].toLowerCase().equals("t")){
+                    if(answers[0].toLowerCase().equals("√")){
                         wordTopicAnswer.setIstrue("1");
                     }else{
                         wordTopicAnswer.setIstrue("0");

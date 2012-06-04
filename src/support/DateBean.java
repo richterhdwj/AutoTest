@@ -486,6 +486,16 @@ public class DateBean {
 		}
 		return nextSession;
 	}
+        
+	/**
+	 * 返回下个月
+	 * 
+	 * @param month
+	 * @return
+	 */
+	public final static String getNextSecond(String time) {
+		return getAfterTimeBySecond(time,1);
+	}
 
 	/**
 	 * 上一个月
@@ -557,6 +567,20 @@ public class DateBean {
 		Calendar cal = Calendar.getInstance();
 		cal.setTime(DateBean.dateString2Date(curTime, "yyyyMMddHHmmss"));
 		cal.add(cal.SECOND, -second);
+		return getDateTime(cal.getTime(), "yyyyMMddHHmmss");
+	}
+       /**
+	 * 相隔秒数后的时间
+	 * 
+	 * @param days
+	 *            int
+	 * @return String
+	 */
+	@SuppressWarnings("static-access")
+	public final static String getAfterTimeBySecond(String curTime, int second) {
+		Calendar cal = Calendar.getInstance();
+		cal.setTime(DateBean.dateString2Date(curTime, "yyyyMMddHHmmss"));
+		cal.add(cal.SECOND, second);
 		return getDateTime(cal.getTime(), "yyyyMMddHHmmss");
 	}
 

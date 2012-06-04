@@ -148,9 +148,11 @@ public class MainViewPlant {
                         if (combo.getValue() != null) {
                             try {
                                 taksObject.setInDataBase(localPath + combo.getValue());
+                                innerView.rewake(null, "setin");
                             } catch (Exception ex) {
                                 Logger.getLogger(MainViewPlant.class.getName()).log(Level.SEVERE, null, ex);
                             }
+                            
                         }
                     }
                 });
