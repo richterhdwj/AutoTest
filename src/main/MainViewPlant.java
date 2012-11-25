@@ -208,7 +208,9 @@ public class MainViewPlant {
         });
 
         // Options menu
-        Menu menu = MenuBuilder.create().text("开始").items(menuAdd, menuTest, menuChare, menuSetin).build();
+        Menu menu = MenuBuilder.create().text("开始").build();
+        
+        menu.getItems().addAll(menuAdd, menuTest, menuChare, menuSetin);
 
         menubar.getMenus().addAll(menu);
 

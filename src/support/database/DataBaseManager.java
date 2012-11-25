@@ -4,9 +4,6 @@
  */
 package support.database;
 
-import java.lang.reflect.Constructor;
-import support.database.DataBaseBean;
-
 /**
  *
  * @author Richter
