@@ -111,7 +111,7 @@ public class TaksObject extends Thread{
 
         List<Object[]> maxValueList = database.selectObject("SELECT ifnull(sum(t.f_attention),0) FROM t_word_topic t,t_word_record t1 where t.f_title=t1.f_pid and t.f_sys_flag='1' and t1.f_sys_flag='1'");
 
-        Integer maxValueLength = maxValueList.get(0)[0].toString().length();
+        Integer maxValueLength = Integer.parseInt(maxValueList.get(0)[0].toString());
         if (maxValueLength < 1) {
             maxValueLength = 1;
         }
